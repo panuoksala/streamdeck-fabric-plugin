@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Microsoft Fabric Property Inspector</title>
+    <link rel="stylesheet" href="css/sdpi.css">
+    <link rel="stylesheet" href="css/property-inspector.css">
+</head>
+<body>
+    <div class="sdpi-wrapper">
+        <div class="sdpi-item" id="tenant_id" type="field">
+            <div class="sdpi-item-label">Tenant Id</div>
+            <input id="txtTenantId" class="sdpi-item-value" type="text" placeholder="Tenant Id." onKeyUp="setSettings(event.target.value, 'TenantId')" required />
+        </div>
+        <div class="sdpi-item" id="workspace_id" type="field">
+            <div class="sdpi-item-label">Workspace Id</div>
+            <input id="txtWorkspaceId" class="sdpi-item-value" type="text" placeholder="Workspace Id. Use Me for own workspace." onKeyUp="setSettings(event.target.value, 'WorkspaceId')" required />
+        </div>
+        <div class="sdpi-item" id="resource_id" type="field">
+            <div class="sdpi-item-label">Fabric Resource Id</div>
+            <input id="txtResourceId" class="sdpi-item-value" type="text" placeholder="Fabric Resource Id." onKeyUp="setSettings(event.target.value, 'ResourceId')" required />
+        </div>
+        <div class="sdpi-item" id="select_loginmethod">
+            <div class="sdpi-item-label">Login Method</div>
+            <select class="sdpi-item-value select" id="loginmethod" onchange="setSettings(event.target.value, 'LoginMethod')">
+                <option value="1" selected="selected">Interactive Browser</option>
+                <option value="2">Service Principal</option>
+            </select>
+        </div>
+        <div id="appregistration" style="display: none;">
+            <div class="sdpi-item" id="client_id" type="field">
+                <div class="sdpi-item-label">Client Id</div>
+                <input id="txtClientId" class="sdpi-item-value" type="text" placeholder="Client Id from Entra app" onKeyUp="setSettings(event.target.value, 'ClientId')" required />
+            </div>
+            <div class="sdpi-item" id="secret" type="field">
+                <div class="sdpi-item-label">Secret</div>
+                <input id="txtSecret" class="sdpi-item-value" type="text" placeholder="Secret from Entra app" onKeyUp="setSettings(event.target.value, 'Secret')" />
+            </div>
+        </div>
+        <div class="sdpi-item" id="select_update_status_every_second">
+            <div class="sdpi-item-label">Status update frequency</div>
+            <select class="sdpi-item-value select" id="update_status_every_second" onchange="setSettings(event.target.value, 'UpdateStatusEverySecond')">
+                <option value="0" selected="selected">Never</option>
+                <option value="1">Every 30 seconds</option>
+                <option value="2">Every 1 minute</option>
+                <option value="3">Every 3 minutes</option>
+                <option value="4">Every 5 minutes</option>
+            </select>
+        </div>
+        <div class="sdpi-item" id="error">
+            <div class="sdpi-item-label">Errors</div>
+            <div id="error_message" style="color: red"></div>
+        </div>
+    </div>
+    <script src="js/property-inspector.js"></script>
+</body>
+</html>

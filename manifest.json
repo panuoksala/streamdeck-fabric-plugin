@@ -1,0 +1,53 @@
+{
+  "Actions": [
+    {
+      "Icon": "images/Fabric20",
+      "Name": "Run Notebook",
+      "States": [
+        {
+          "Image": "images/Fabric72",
+          "TitleAlignment": "middle",
+          "FontSize": "16"
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "Tooltip": "Run Farbic Notebook.",
+      "UUID": "net.oksala.microsoftfabric.runner"
+    },
+    {
+      "Icon": "images/Fabric20",
+      "Name": "Run Data Pipeline",
+      "States": [
+        {
+          "Image": "images/Fabric72",
+          "TitleAlignment": "middle",
+          "FontSize": "16"
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "Tooltip": "Run Data Pipeline",
+      "UUID": "net.oksala.microsoftfabric.datapipelinerunner"
+    }
+  ],
+  "Category": "Microsoft Fabric by Panu Oksala",
+  "CategoryIcon": "images/Fabric28",
+  "Disabled": false,
+  "Author": "Panu Oksala",
+  "CodePath": "StreamDeckMicrosoftFabric.exe",
+  "PropertyInspectorPath": "property_inspector/property_inspector.html",
+  "Description": "Stream Deck plugin for Microsoft Fabric by Panu Oksala. Control Microsoft Fabric directly from your Stream Deck device.",
+  "Name": "FabricRunner",
+  "Icon": "images/Fabric72",
+  "URL": "https://github.com/panuoksala/streamdeck-microsoftfabric-plugin",
+  "Version": "0.1.0",
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "5.0"
+  },
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ]
+}
