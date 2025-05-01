@@ -1,4 +1,4 @@
-[![.NET](https://github.com/panuoksala/streamdeck-azuredevops-plugin/actions/workflows/dotnet.yml/badge.svg?branch=master)](https://github.com/panuoksala/streamdeck-azuredevops-plugin/actions/workflows/dotnet.yml)
+[![Build solution](https://github.com/panuoksala/streamdeck-fabric-plugin/actions/workflows/dotnet-build.yml/badge.svg)](https://github.com/panuoksala/streamdeck-fabric-plugin/actions/workflows/dotnet-build.yml)
 
 # Stream Deck Microsoft Fabric plugin
 
