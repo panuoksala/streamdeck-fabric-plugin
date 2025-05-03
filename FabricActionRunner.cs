@@ -118,7 +118,24 @@ namespace StreamDeckMicrosoftFabric
                 // Check login status
                 if (!_login.IsLoginValid())
                 {
-                    await _login.Login();
+                    try
+                    {
+                        await _login.Login();
+                    }
+                    catch (Exception ex)
+                    {
+                        await Manager.SetImageAsync(args.context, "images/Fabric-failed.png");
+                        if (ex.Message.Length > 50)
+                        {
+                            SettingsModel.ErrorMessage = string.Concat(ex.Message.AsSpan(0, 80), "...");
+                        }
+                        else
+                        {
+                            SettingsModel.ErrorMessage = ex.Message;
+                        }
+
+                        return;
+                    }
                 }
 
                 await Manager.SetImageAsync(args.context, "images/Fabric-updating.png");
@@ -137,7 +154,7 @@ namespace StreamDeckMicrosoftFabric
                 }
                 else
                 {
-                    if(status == FabricService.JobRunStatus.Running)
+                    if (status == FabricService.JobRunStatus.Running)
                     {
                         // There won't be later check so always set to success to avoid in progress image
                         // If it is failed to start we will leave that icon as is

@@ -72,6 +72,7 @@ namespace StreamDeckMicrosoftFabric.Services
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Failed to login.");
+                    throw;
                 }
             }
             else
@@ -101,6 +102,7 @@ namespace StreamDeckMicrosoftFabric.Services
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Failed to login with interactive mode.");
+                    throw;
                 }
             }
         }
