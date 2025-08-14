@@ -1,12 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Serilog;
-using StreamDeckMicrosoftFabric.Models;
-using StreamDeckMicrosoftFabric.Services;
 using StreamDeckLib;
-using StreamDeckLib.Messages;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Net.Http;
 
 namespace StreamDeckMicrosoftFabric
@@ -17,7 +10,12 @@ namespace StreamDeckMicrosoftFabric
     /// and if we don't have separated actionuuid, the action name is shown wrong (duplicates).
     /// </summary>
     [ActionUuid(Uuid = "net.oksala.microsoftfabric.datapipelinerunner")]
-    public class FabricRunnerDatapipeline(IHttpClientFactory clientFactory, ILoggerFactory loggerFactory) : FabricActionRunner(clientFactory, loggerFactory)
+    public class DatapipelineActionRunner(IHttpClientFactory clientFactory, ILoggerFactory loggerFactory)
+        : BaseAction(clientFactory, loggerFactory)
     {
+        protected override SupportedActions ResolveAction()
+        {
+            return SupportedActions.RunDatapipeline;
+        }
     }
 }

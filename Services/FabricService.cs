@@ -1,17 +1,12 @@
-﻿using Azure.Core;
-using Azure.Identity;
+﻿using Azure;
 using Microsoft.Extensions.Logging;
-using Microsoft.Identity.Client;
-using StreamDeckMicrosoftFabric.models.Fabric;
 using StreamDeckMicrosoftFabric.Models;
 using System;
+using System.Data;
 using System.Net.Http;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
-using static System.Collections.Specialized.BitVector32;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace StreamDeckMicrosoftFabric.Services
 {
@@ -40,11 +35,16 @@ namespace StreamDeckMicrosoftFabric.Services
             _logger.LogInformation($"Running job {jobId}.");
 
             var client = _clientFactory.CreateClient();
+            string url = $"https://api.fabric.microsoft.com/v1/workspaces/{workspaceId}/items/{jobId}/jobs/instances?jobType={ResolveApiJobType(actionType)}";
+            //if (actionType == SupportedActions.RunDataFlow)
+            //{
+            //    // Dataflows have a different API endpoint
+            //    url = $"https://api.fabric.microsoft.com/v1/workspaces/{workspaceId}/dataflows/{jobId}/jobs/instances?jobType={ResolveApiJobType(actionType)}";
+            //}
 
-            var url = $"https://api.fabric.microsoft.com/v1/workspaces/{workspaceId}/items/{jobId}/jobs/instances?jobType={ResolveApiJobType(actionType)}";
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_login.AccessToken}");
 
-            HttpResponseMessage response = await client.PostAsync(url, null);
+            var response = await client.PostAsync(url, null);
 
             if (response.IsSuccessStatusCode)
             {
@@ -106,6 +106,7 @@ namespace StreamDeckMicrosoftFabric.Services
             {
                 SupportedActions.RunNotebook => "RunNotebook",
                 SupportedActions.RunDatapipeline => "Pipeline",
+                SupportedActions.RunDataFlow => "Publish",
                 _ => "RunNotebook",
             };
         }

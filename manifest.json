@@ -12,7 +12,7 @@
       ],
       "SupportedInMultiActions": false,
       "Tooltip": "Run Farbic Notebook.",
-      "UUID": "net.oksala.microsoftfabric.runner"
+      "UUID": "net.oksala.microsoftfabric.notebookrunner"
     },
     {
       "Icon": "images/Fabric20",
@@ -27,6 +27,20 @@
       "SupportedInMultiActions": false,
       "Tooltip": "Run Data Pipeline",
       "UUID": "net.oksala.microsoftfabric.datapipelinerunner"
+    },
+    {
+      "Icon": "images/Fabric20",
+      "Name": "Run DataFlow",
+      "States": [
+        {
+          "Image": "images/Fabric72",
+          "TitleAlignment": "middle",
+          "FontSize": "16"
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "Tooltip": "Run DataFlow",
+      "UUID": "net.oksala.microsoftfabric.dataflowrunner"
     }
   ],
   "Category": "Microsoft Fabric by Panu Oksala",

@@ -1,8 +1,10 @@
-﻿using StreamDeckMicrosoftFabric.Models;
-using StreamDeckMicrosoftFabric.Services;
+﻿using Microsoft.Extensions.Logging;
 using StreamDeckLib;
 using StreamDeckLib.Messages;
+using StreamDeckMicrosoftFabric.Models;
+using StreamDeckMicrosoftFabric.Services;
 using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,8 +15,16 @@ namespace StreamDeckMicrosoftFabric
         private CancellationTokenSource _backgroundTaskToken;
         private DateTime _pressDownDateTime;
         private int _currentUpdateFrequency;
-
         protected double DoublePressDuration { get; set; } = 1;
+
+        private readonly FabricService _service;
+        private readonly LoginService _login;
+
+        public BaseAction(IHttpClientFactory clientFactory, ILoggerFactory loggerFactory)
+        {
+            _login = new LoginService(loggerFactory.CreateLogger<LoginService>(), SettingsModel);
+            _service = new FabricService(loggerFactory.CreateLogger<FabricService>(), clientFactory, SettingsModel, _login);
+        }
 
         public override async Task OnDidReceiveSettings(StreamDeckEventPayload args)
         {
@@ -91,15 +101,14 @@ namespace StreamDeckMicrosoftFabric
             }
         }
 
-        public abstract Task UpdateDisplay(StreamDeckEventPayload args);
-        public abstract Task OnTap(StreamDeckEventPayload args);
-        public abstract Task OnLongPress(StreamDeckEventPayload args);
-        public abstract Task OnError(StreamDeckEventPayload args, Exception ex);
-        public abstract bool IsSettingsValid();
-
         public virtual Task MissingSettings(StreamDeckEventPayload args)
         {
             return Task.CompletedTask;
+        }
+
+        protected bool IsSettingsValid()
+        {
+            return SettingsModel.IsValid();
         }
 
         protected void StartBackgroundTask(StreamDeckEventPayload args)
@@ -112,11 +121,8 @@ namespace StreamDeckMicrosoftFabric
 
         protected void StopBackgroundTask()
         {
-            if (_backgroundTaskToken != null)
-            {
-                _backgroundTaskToken.Cancel();
-                _backgroundTaskToken = null;
-            }
+            _backgroundTaskToken?.Cancel();
+            _backgroundTaskToken = null;
         }
 
         private async Task BackgroundTask(StreamDeckEventPayload args, CancellationToken ct)
@@ -137,6 +143,126 @@ namespace StreamDeckMicrosoftFabric
                 {
                     await OnError(args, ex);
                 }
+            }
+        }        
+
+        public async Task<FabricService.JobRunStatus> UpdateStatus(string context)
+        {
+            try
+            {
+                if (_service.LastJobItemStatus == FabricService.JobRunStatus.Running)
+                {
+                    // Job is still running, check status
+                    var jobStatus = await _service.CheckLastJobStatusAsync();
+                    await Manager.SetImageAsync(context, ConvertJobStatusToImage(jobStatus));
+
+                    return jobStatus;
+                }
+            }
+            catch (Exception ex)
+            {
+                await Manager.SetImageAsync(context, "images/Fabric-unknown.png");
+                Logger.LogError(ex, "Failed to update status. Stopping checking");
+                return FabricService.JobRunStatus.Failed;
+            }
+
+            return FabricService.JobRunStatus.Success;
+        }
+
+        protected abstract SupportedActions ResolveAction();
+
+        private string ConvertJobStatusToImage(FabricService.JobRunStatus jobStatus)
+        {
+            return jobStatus switch
+            {
+                FabricService.JobRunStatus.Success => "images/Fabric-success.png",
+                FabricService.JobRunStatus.Failed => "images/Fabric-failed.png",
+                FabricService.JobRunStatus.Running => "images/Fabric-waiting.png",
+                _ => "images/Fabric-unknown.png",
+            };
+        }
+
+        public async Task OnTap(StreamDeckEventPayload args)
+        {
+            var action = ResolveAction();
+            await ExecuteKeyPress(args, action);
+        }
+
+        public async Task OnLongPress(StreamDeckEventPayload args)
+        {
+            var action = ResolveAction();
+            await ExecuteKeyPress(args, action);
+        }
+
+        public async Task OnError(StreamDeckEventPayload args, Exception ex)
+        {
+            try
+            {
+                SettingsModel.ErrorMessage = ex.Message;
+
+                await Manager.ShowAlertAsync(args.context);
+                await Manager.SetImageAsync(args.context, "images/Fabric-unknown.png");
+
+                await Manager.SetSettingsAsync(args.context, SettingsModel);
+            }
+            catch (Exception handlingException)
+            {
+                Logger.LogError(handlingException, $"Failed to handle error: {ex.Message}");
+            }
+        }
+
+        private async Task ExecuteKeyPress(StreamDeckEventPayload args, SupportedActions action)
+        {
+            try
+            {
+                // Clear possible error message
+                SettingsModel.ErrorMessage = string.Empty;
+
+                // Check login status
+                if (!_login.IsLoginValid())
+                {
+                    await _login.Login();
+                }
+
+                await Manager.SetImageAsync(args.context, "images/Fabric-updating.png");
+
+                await _service.RunJob(SettingsModel.WorkspaceId, SettingsModel.ResourceId, action);
+                // Wait 3000ms to let the job start
+                await Task.Delay(TimeSpan.FromSeconds(3));
+
+                var status = await _service.CheckLastJobStatusAsync();
+                await Manager.SetImageAsync(args.context, ConvertJobStatusToImage(status));
+
+                if ((StatusUpdateFrequency)SettingsModel.UpdateStatusEverySecond != StatusUpdateFrequency.Never)
+                {
+                    // Start background task to check status later
+                    StartBackgroundTask(args);
+                }
+                else
+                {
+                    if (status == FabricService.JobRunStatus.Running)
+                    {
+                        // There won't be later check so always set to success to avoid in progress image
+                        // If it is failed to start we will leave that icon as is
+                        await Manager.SetImageAsync(args.context, "images/Fabric-success.png");
+                    }
+                }
+
+                await Manager.SetSettingsAsync(args.context, SettingsModel);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to initiate action from keypress.");
+                throw;
+            }
+        }
+
+        public async Task UpdateDisplay(StreamDeckEventPayload args)
+        {
+            var jobStatus = await UpdateStatus(args.context);
+            if (jobStatus != FabricService.JobRunStatus.Running)
+            {
+                StopBackgroundTask();
             }
         }
     }
