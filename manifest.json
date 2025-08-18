@@ -27,21 +27,7 @@
       "SupportedInMultiActions": false,
       "Tooltip": "Run Data Pipeline",
       "UUID": "net.oksala.microsoftfabric.datapipelinerunner"
-    },
-    {
-      "Icon": "images/Fabric20",
-      "Name": "Run DataFlow",
-      "States": [
-        {
-          "Image": "images/Fabric72",
-          "TitleAlignment": "middle",
-          "FontSize": "16"
-        }
-      ],
-      "SupportedInMultiActions": false,
-      "Tooltip": "Run DataFlow",
-      "UUID": "net.oksala.microsoftfabric.dataflowrunner"
-    }
+    }    
   ],
   "Category": "Microsoft Fabric by Panu Oksala",
   "CategoryIcon": "images/Fabric28",
