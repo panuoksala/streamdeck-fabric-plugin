@@ -14,7 +14,7 @@ namespace StreamDeckMicrosoftFabric
     {
         private CancellationTokenSource _backgroundTaskToken;
         private DateTime _pressDownDateTime;
-        private int _currentUpdateFrequency;
+
         protected double DoublePressDuration { get; set; } = 1;
 
         private readonly FabricService _service;

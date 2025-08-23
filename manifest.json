@@ -27,7 +27,7 @@
       "SupportedInMultiActions": false,
       "Tooltip": "Run Data Pipeline",
       "UUID": "net.oksala.microsoftfabric.datapipelinerunner"
-    }    
+    }
   ],
   "Category": "Microsoft Fabric by Panu Oksala",
   "CategoryIcon": "images/Fabric28",
@@ -38,7 +38,7 @@
   "Description": "Stream Deck plugin for Microsoft Fabric by Panu Oksala. Control Microsoft Fabric directly from your Stream Deck device.",
   "Name": "FabricRunner",
   "Icon": "images/Fabric72",
-  "URL": "https://github.com/panuoksala/streamdeck-microsoftfabric-plugin",
+  "URL": "https://github.com/panuoksala/streamdeck-fabric-plugin",
   "Version": "0.1.0",
   "SDKVersion": 2,
   "Software": {

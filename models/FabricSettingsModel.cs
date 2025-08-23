@@ -57,19 +57,14 @@ namespace StreamDeckMicrosoftFabric.Models
 
         public int GetUpdateStatusInSeconds()
         {
-            switch((StatusUpdateFrequency)UpdateStatusEverySecond)
+            return (StatusUpdateFrequency)UpdateStatusEverySecond switch
             {
-                case StatusUpdateFrequency.Every30seconds:
-                    return 30;
-                case StatusUpdateFrequency.Every60seconds:
-                    return 60;
-                case StatusUpdateFrequency.Every180seconds:
-                    return 180;
-                case StatusUpdateFrequency.Every300seconds:
-                    return 300;
-                default:
-                    return 0;
-            }
+                StatusUpdateFrequency.Every30seconds => 30,
+                StatusUpdateFrequency.Every60seconds => 60,
+                StatusUpdateFrequency.Every180seconds => 180,
+                StatusUpdateFrequency.Every300seconds => 300,
+                _ => 60, // Default to 60 to avoid issues if something goes wrong
+            };
         }
     }
 
