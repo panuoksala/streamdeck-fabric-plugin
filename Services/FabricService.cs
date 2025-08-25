@@ -6,6 +6,7 @@ using System.Data;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace StreamDeckMicrosoftFabric.Services
@@ -27,6 +28,7 @@ namespace StreamDeckMicrosoftFabric.Services
         private readonly IHttpClientFactory _clientFactory = httpClientFactory;
         private readonly LoginService _login = loginService;
         private Uri _lastJobLocation = null;
+        private readonly SemaphoreSlim _statusCheckSemaphore = new SemaphoreSlim(1, 1);
 
         public JobRunStatus LastJobItemStatus { get; set; } = JobRunStatus.NotInitialized;
 
@@ -62,40 +64,55 @@ namespace StreamDeckMicrosoftFabric.Services
 
         public async Task<JobRunStatus> CheckLastJobStatusAsync()
         {
-            var client = _clientFactory.CreateClient();
-            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_login.AccessToken}");
-
-            var response = await client.GetAsync(_lastJobLocation);
-            if (response.IsSuccessStatusCode)
+            // Try to enter the semaphore, but don't wait if it's already taken
+            if (!await _statusCheckSemaphore.WaitAsync(0))
             {
-                _logger.LogInformation($"Job status checked. Job location: {_lastJobLocation}");
-                var responseJson = await JsonNode.ParseAsync(await response.Content.ReadAsStreamAsync());
+                _logger.LogInformation("Status check already in progress, skipping duplicate call");
+                return LastJobItemStatus; // Return the current status instead of making a duplicate call
+            }
 
-                if (responseJson["status"]?.ToString() == "Completed")
+            try
+            {
+                var client = _clientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_login.AccessToken}");
+
+                var response = await client.GetAsync(_lastJobLocation);
+                if (response.IsSuccessStatusCode)
                 {
-                    LastJobItemStatus = JobRunStatus.Success;
-                    _logger.LogInformation($"Job completed as success. Job location: {_lastJobLocation}");
-                    return await Task.FromResult(JobRunStatus.Success);
-                }
-                else if (responseJson["status"]?.ToString() == "Failed")
-                {
-                    LastJobItemStatus = JobRunStatus.Failed;
-                    _logger.LogInformation($"Job completed as a failure. Job location: {_lastJobLocation}");
-                    return await Task.FromResult(JobRunStatus.Failed);
+                    _logger.LogInformation($"Job status checked. Job location: {_lastJobLocation}");
+                    var responseJson = await JsonNode.ParseAsync(await response.Content.ReadAsStreamAsync());
+
+                    if (responseJson["status"]?.ToString() == "Completed")
+                    {
+                        LastJobItemStatus = JobRunStatus.Success;
+                        _logger.LogInformation($"Job completed as success. Job location: {_lastJobLocation}");
+                        return await Task.FromResult(JobRunStatus.Success);
+                    }
+                    else if (responseJson["status"]?.ToString() == "Failed")
+                    {
+                        LastJobItemStatus = JobRunStatus.Failed;
+                        _logger.LogInformation($"Job completed as a failure. Job location: {_lastJobLocation}");
+                        return await Task.FromResult(JobRunStatus.Failed);
+                    }
+                    else
+                    {
+                        LastJobItemStatus = JobRunStatus.Running;
+                        _logger.LogInformation($"Job still running. Job location: {_lastJobLocation}");
+                        return await Task.FromResult(JobRunStatus.Running);
+                    }
                 }
                 else
                 {
-                    LastJobItemStatus = JobRunStatus.Running;
-                    _logger.LogInformation($"Job still running. Job location: {_lastJobLocation}");
-                    return await Task.FromResult(JobRunStatus.Running);
+                    // Tell caller that job failed
+                    LastJobItemStatus = JobRunStatus.Failed;
+                    _logger.LogError($"Failed to check job status. Job location: {_lastJobLocation}");
+                    return await Task.FromResult(JobRunStatus.Failed);
                 }
             }
-            else
+            finally
             {
-                // Tell caller that job failed
-                LastJobItemStatus = JobRunStatus.Failed;
-                _logger.LogError($"Failed to check job status. Job location: {_lastJobLocation}");
-                return await Task.FromResult(JobRunStatus.Failed);
+                // Always release the semaphore when done
+                _statusCheckSemaphore.Release();
             }
         }
 
