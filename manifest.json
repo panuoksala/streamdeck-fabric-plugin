@@ -7,7 +7,7 @@
         {
           "Image": "images/Fabric72",
           "TitleAlignment": "middle",
-          "FontSize": "16"
+          "FontSize": "10"
         }
       ],
       "SupportedInMultiActions": false,
@@ -21,7 +21,7 @@
         {
           "Image": "images/Fabric72",
           "TitleAlignment": "middle",
-          "FontSize": "16"
+          "FontSize": "10"
         }
       ],
       "SupportedInMultiActions": false,
@@ -42,9 +42,14 @@
   "Version": "0.1.0",
   "SDKVersion": 2,
   "Software": {
-    "MinimumVersion": "5.0"
+    "MinimumVersion": "6.4"
   },
+  "UUID": "net.oksala.microsoftfabric",
   "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "13"
+    },
     {
       "Platform": "windows",
       "MinimumVersion": "10"

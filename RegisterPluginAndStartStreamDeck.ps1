@@ -33,14 +33,10 @@ If (-not (Test-Path $bindir)) {
 $manifestPath = Join-Path $bindir "manifest.json"
 $json = Get-Content -Path $manifestPath -Raw | ConvertFrom-Json
 
-$uuidAction = $json.Actions[0].UUID
-
-$pluginID = $uuidAction.substring(0, $uuidAction.Length - ".action".Length)
-
 if($IsMacOS) {
-  $destDir = "$HOME/Library/Application Support/com.elgato.StreamDeck/Plugins/$pluginID.sdPlugin"
+  $destDir = "$HOME/Library/Application Support/com.elgato.StreamDeck/Plugins/net.oksala.microsoftfabric.sdPlugin"
 } else {
-  $destDir = "$($env:APPDATA)\Elgato\StreamDeck\Plugins\$pluginID.sdPlugin"
+  $destDir = "$($env:APPDATA)\Elgato\StreamDeck\Plugins\net.oksala.microsoftfabric.sdPlugin"
 }
 
 $pluginName = Split-Path $basePath -leaf
