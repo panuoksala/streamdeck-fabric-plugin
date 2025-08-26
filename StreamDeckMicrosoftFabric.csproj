@@ -27,10 +27,10 @@
 
 	<!--Dependencies-->
 	<ItemGroup>
-		<PackageReference Include="Azure.Core" Version="1.47.2" />
+		<PackageReference Include="Azure.Core" Version="1.47.3" />
 		<PackageReference Include="Azure.Identity" Version="1.15.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
-		<PackageReference Include="Microsoft.Identity.Client" Version="4.74.1" />
+		<PackageReference Include="Microsoft.Identity.Client" Version="4.76.0" />
 		<PackageReference Include="StreamDeckLib" Version="0.*" />
 		<PackageReference Include="StreamDeckLib.Config" Version="0.*" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
@@ -43,6 +43,7 @@
 		<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
 		<PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
+		<PackageReference Include="System.Private.Uri" Version="4.3.2" />
 	</ItemGroup>
 
 	<!--Deployment files that must go with the build executable -->
