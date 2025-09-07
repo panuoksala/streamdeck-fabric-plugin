@@ -146,8 +146,7 @@ namespace StreamDeckMicrosoftFabric.Services
             }
 
             var root = await JsonNode.ParseAsync(await response.Content.ReadAsStreamAsync());
-            var arr = root?["value"] as JsonArray;
-            if (arr == null)
+            if (root?["value"] is not JsonArray arr)
             {
                 _logger.LogWarning("No 'value' array in usages response.");
                 return null;
@@ -170,7 +169,6 @@ namespace StreamDeckMicrosoftFabric.Services
             _logger.LogWarning("Capacity with name '{CapacityName}' not found in usage list.", capacityName);
             return null;
         }
-
 
         private static string ResolveApiJobType(SupportedActions action)
         {
