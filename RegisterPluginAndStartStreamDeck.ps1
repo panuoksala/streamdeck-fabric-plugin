@@ -34,9 +34,9 @@ $manifestPath = Join-Path $bindir "manifest.json"
 $json = Get-Content -Path $manifestPath -Raw | ConvertFrom-Json
 
 if($IsMacOS) {
-  $destDir = "$HOME/Library/Application Support/com.elgato.StreamDeck/Plugins/net.oksala.microsoftfabric.sdPlugin"
+  $destDir = "$HOME/Library/Application Support/com.elgato.StreamDeck/Plugins/net.fabricdeck.microsoftfabric.sdPlugin"
 } else {
-  $destDir = "$($env:APPDATA)\Elgato\StreamDeck\Plugins\net.oksala.microsoftfabric.sdPlugin"
+  $destDir = "$($env:APPDATA)\Elgato\StreamDeck\Plugins\net.fabricdeck.microsoftfabric.sdPlugin"
 }
 
 $pluginName = Split-Path $basePath -leaf

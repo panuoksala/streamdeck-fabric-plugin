@@ -224,6 +224,24 @@ namespace StreamDeckMicrosoftFabric
                     await _login.Login();
                 }
 
+                if (action == SupportedActions.GetCapacityUsage)
+                {
+                    await Manager.SetImageAsync(args.context, "images/Fabric-updating.png");
+                    var usage = await _service.GetCapacityUsageAsync(SettingsModel.ResourceId);
+                    if (usage == null)
+                    {
+                        await Manager.SetImageAsync(args.context, "images/Fabric-failed.png");
+                        await Manager.SetTitleAsync(args.context, "N/A");
+                        return;
+                    }
+
+                    var (used, total) = usage.Value;
+                    string display = $"{used:0.#}/{total:0.#}"; // Could add percentage if desired
+                    await Manager.SetTitleAsync(args.context, display);
+                    await Manager.SetImageAsync(args.context, "images/Fabric-success.png");
+                    return; // No background tracking
+                }
+
                 await Manager.SetImageAsync(args.context, "images/Fabric-updating.png");
 
                 await _service.RunJob(SettingsModel.WorkspaceId, SettingsModel.ResourceId, action);

@@ -34,6 +34,12 @@ namespace StreamDeckMicrosoftFabric.Services
 
         public async Task<string> RunJob(string workspaceId, string jobId, SupportedActions actionType)
         {
+            if (actionType == SupportedActions.GetCapacityUsage)
+            {
+                // Not a runnable job type; caller should invoke GetCapacityUsageAsync instead.
+                return "images/Fabric-updating.png";
+            }
+
             _logger.LogInformation($"Running job {jobId}.");
 
             var client = _clientFactory.CreateClient();
@@ -114,6 +120,56 @@ namespace StreamDeckMicrosoftFabric.Services
                 // Always release the semaphore when done
                 _statusCheckSemaphore.Release();
             }
+        }
+
+        public async Task<(double used, double total)?> GetCapacityUsageAsync(string capacityName)
+        {
+            if (string.IsNullOrWhiteSpace(capacityName))
+            {
+                _logger.LogWarning("Capacity name (ResourceId) is empty.");
+                return null;
+            }
+
+            var client = _clientFactory.CreateClient();
+            client.DefaultRequestHeaders.Remove("Authorization");
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_login.AccessToken}");
+
+            // Need subscription id and location to get capacity usage.
+            //https://management.azure.com/subscriptions/548B7FB7-3B2A-4F46-BB02-66473F1FC22C/providers/Microsoft.Fabric/locations/centraluseuap/usages?api-version=2025-01-15-preview
+            var url = "https://api.fabric.microsoft.com/v1/capacities/usages?api-version=2025-01-15-preview";
+
+            var response = await client.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+            {
+                var err = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Failed to fetch capacity usages. Status {Status}. Body: {Body}", response.StatusCode, err);
+                return null;
+            }
+
+            var root = await JsonNode.ParseAsync(await response.Content.ReadAsStreamAsync());
+            var arr = root?["value"] as JsonArray;
+            if (arr == null)
+            {
+                _logger.LogWarning("No 'value' array in usages response.");
+                return null;
+            }
+
+            foreach (var node in arr)
+            {
+                var name = node?["capacityName"]?.ToString();
+                if (name != null && name.Equals(capacityName, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (double.TryParse(node?["usedCapacityUnits"]?.ToString(), out var used) &&
+                        double.TryParse(node?["totalCapacityUnits"]?.ToString(), out var total))
+                    {
+                        _logger.LogInformation("Found capacity {Name}: {Used}/{Total} CU used.", name, used, total);
+                        return (used, total);
+                    }
+                }
+            }
+
+            _logger.LogWarning("Capacity with name '{CapacityName}' not found in usage list.", capacityName);
+            return null;
         }
 
 

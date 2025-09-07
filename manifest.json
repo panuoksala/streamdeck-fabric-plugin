@@ -12,7 +12,7 @@
       ],
       "SupportedInMultiActions": false,
       "Tooltip": "Run Farbic Notebook.",
-      "UUID": "net.oksala.microsoftfabric.notebookrunner"
+      "UUID": "net.fabricdeck.microsoftfabric.notebookrunner"
     },
     {
       "Icon": "images/Fabric_pipeline",
@@ -26,7 +26,21 @@
       ],
       "SupportedInMultiActions": false,
       "Tooltip": "Run Data Pipeline",
-      "UUID": "net.oksala.microsoftfabric.datapipelinerunner"
+      "UUID": "net.fabricdeck.microsoftfabric.datapipelinerunner"
+    },
+    {
+      "Icon": "images/Fabric72",
+      "Name": "Capacity Usage",
+      "States": [
+        {
+          "Image": "images/Fabric72",
+          "TitleAlignment": "middle",
+          "FontSize": 10
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "Tooltip": "Show Fabric Capacity CU usage",
+      "UUID": "net.fabricdeck.microsoftfabric.consumptionrunner"
     }
   ],
   "Category": "Fabric Deck",
@@ -34,16 +48,16 @@
   "Author": "Panu Oksala",
   "CodePath": "StreamDeckMicrosoftFabric.exe",
   "PropertyInspectorPath": "property_inspector/property_inspector.html",
-  "Description": "Fabric Deck is a Stream Deck plugin for Microsoft Fabric. You can run Fabric Notebooks and Data Pipelines directly from your Stream Deck device. Get feedback about your fabric resource run directly back to your device. You can use Interactive authentication or Microsoft Entra Service Principals to authenticate.",
+  "Description": "Fabric Deck is a Stream Deck plugin for Microsoft Fabric. You can run Fabric Notebooks and Data Pipelines directly from your Stream Deck device and get feedback about your fabric resource run directly back to your device. You can use Interactive authentication or Microsoft Entra Service Principals to authenticate against Fabric.",
   "Name": "Fabric Deck",
   "Icon": "images/Fabric72",
   "URL": "https://github.com/panuoksala/streamdeck-fabric-plugin",
-  "Version": "0.0.1.0",
+  "Version": "0.0.2.0",
   "SDKVersion": 2,
   "Software": {
     "MinimumVersion": "6.4"
   },
-  "UUID": "net.oksala.microsoftfabric",
+  "UUID": "net.fabricdeck.microsoftfabric",
   "OS": [
     {
       "Platform": "mac",

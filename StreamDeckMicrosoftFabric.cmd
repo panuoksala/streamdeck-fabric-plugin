@@ -1,2 +1,2 @@
-﻿cd %appdata%\Elgato\StreamDeck\Plugins\net.oksala.microsoftfabric.runner
+﻿cd %appdata%\Elgato\StreamDeck\Plugins\net.fabricdeck.microsoftfabric.runner
 StreamDeckMicrosoftFabric.exe -break %*

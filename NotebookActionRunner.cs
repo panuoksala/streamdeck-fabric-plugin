@@ -9,12 +9,13 @@ namespace StreamDeckMicrosoftFabric
         RunNotebook = 0,
         RunDatapipeline = 1,
         RunDataFlow = 2,
+        GetCapacityUsage = 3, // New action to retrieve Fabric capacity CU usage
     }
 
     /// <summary>
     /// The notebook runner action
     /// </summary>
-    [ActionUuid(Uuid = "net.oksala.microsoftfabric.notebookrunner")]
+    [ActionUuid(Uuid = "net.fabricdeck.microsoftfabric.notebookrunner")]
     public class NotebookActionRunner(IHttpClientFactory clientFactory, ILoggerFactory loggerFactory) 
         : BaseAction(clientFactory, loggerFactory)
     {

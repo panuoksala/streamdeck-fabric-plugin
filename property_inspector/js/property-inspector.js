@@ -13,6 +13,18 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
     websocket = new WebSocket('ws://localhost:' + inPort);
 
     try {
+        // If this is the consumption runner action, adjust label
+        if (actionInfo.action === 'net.fabricdeck.microsoftfabric.consumptionrunner') {
+            const labelEl = document.getElementById('resource_id_label');
+            if (labelEl) {
+                labelEl.innerText = 'Fabric Consumption Name';
+            }
+            const inputEl = document.getElementById('txtResourceId');
+            if (inputEl) {
+                inputEl.placeholder = 'Fabric Consumption Name';
+            }
+        }
+
         // initialize values
         if (actionInfo.payload.settings.settingsModel) {
             settingsModel.WorkspaceId = actionInfo.payload.settings.settingsModel.WorkspaceId;
