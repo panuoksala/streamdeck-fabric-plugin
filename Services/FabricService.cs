@@ -135,7 +135,6 @@ namespace StreamDeckMicrosoftFabric.Services
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_login.AccessToken}");
 
             // Need subscription id and location to get capacity usage.
-            //https://management.azure.com/subscriptions/548B7FB7-3B2A-4F46-BB02-66473F1FC22C/providers/Microsoft.Fabric/locations/centraluseuap/usages?api-version=2025-01-15-preview
             var url = "https://api.fabric.microsoft.com/v1/capacities/usages?api-version=2025-01-15-preview";
 
             var response = await client.GetAsync(url);
