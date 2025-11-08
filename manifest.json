@@ -41,20 +41,6 @@
       "SupportedInMultiActions": false,
       "Tooltip": "Run Dataflow Gen2 (CI/CD). Only CI/CD versions are supported.",
       "UUID": "net.fabricdeck.microsoftfabric.dataflowrunner"
-    },
-    {
-      "Icon": "images/Fabric72",
-      "Name": "Capacity Usage",
-      "States": [
-        {
-          "Image": "images/Fabric72",
-          "TitleAlignment": "middle",
-          "FontSize": 10
-        }
-      ],
-      "SupportedInMultiActions": false,
-      "Tooltip": "Show Fabric Capacity CU usage",
-      "UUID": "net.fabricdeck.microsoftfabric.consumptionrunner"
     }
   ],
   "Category": "Fabric Deck",
