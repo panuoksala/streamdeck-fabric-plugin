@@ -48,14 +48,17 @@
   "Author": "Panu Oksala",
   "CodePath": "StreamDeckMicrosoftFabric.exe",
   "PropertyInspectorPath": "property_inspector/property_inspector.html",
-  "Description": "Fabric Deck is a Stream Deck plugin for Microsoft Fabric. You can run Fabric Notebooks and Data Pipelines directly from your Stream Deck device and get feedback about your fabric resource run directly back to your device. You can use Interactive authentication or Microsoft Entra Service Principals to authenticate against Fabric.",
+  "Description": "Fabric Deck is a Stream Deck plugin for Microsoft Fabric. You can run Fabric Notebooks, Data Pipelines and Dataflow (CI/CD) directly from your Stream Deck device and get feedback about your fabric resource run directly back to your device. You can use Interactive authentication or Microsoft Entra Service Principals to authenticate against Fabric.",
   "Name": "Fabric Deck",
   "Icon": "images/Fabric72",
   "URL": "https://github.com/panuoksala/streamdeck-fabric-plugin",
-  "Version": "0.0.2.0",
+  "Version": "0.0.3.0",
   "SDKVersion": 2,
   "Software": {
     "MinimumVersion": "6.4"
+  },
+  "Nodejs": {
+    "Version": "20"
   },
   "UUID": "net.fabricdeck.microsoftfabric",
   "OS": [
