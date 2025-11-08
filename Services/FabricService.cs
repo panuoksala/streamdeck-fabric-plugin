@@ -32,23 +32,24 @@ namespace StreamDeckMicrosoftFabric.Services
 
         public JobRunStatus LastJobItemStatus { get; set; } = JobRunStatus.NotInitialized;
 
-        public async Task<string> RunJob(string workspaceId, string jobId, SupportedActions actionType)
+        public async Task<bool> RunJob(string workspaceId, string jobId, SupportedActions actionType)
         {
             if (actionType == SupportedActions.GetCapacityUsage)
             {
                 // Not a runnable job type; caller should invoke GetCapacityUsageAsync instead.
-                return "images/Fabric-updating.png";
+                return true;
             }
 
             _logger.LogInformation($"Running job {jobId}.");
 
             var client = _clientFactory.CreateClient();
             string url = $"https://api.fabric.microsoft.com/v1/workspaces/{workspaceId}/items/{jobId}/jobs/instances?jobType={ResolveApiJobType(actionType)}";
-            //if (actionType == SupportedActions.RunDataFlow)
-            //{
-            //    // Dataflows have a different API endpoint
-            //    url = $"https://api.fabric.microsoft.com/v1/workspaces/{workspaceId}/dataflows/{jobId}/jobs/instances?jobType={ResolveApiJobType(actionType)}";
-            //}
+
+            if (actionType == SupportedActions.RunDataFlow)
+            {
+                // Dataflows have a different API endpoint
+                url = $"https://api.fabric.microsoft.com/v1/workspaces/{workspaceId}/dataflows/{jobId}/jobs/instances?jobType=Refresh";
+            }
 
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_login.AccessToken}");
 
@@ -58,23 +59,36 @@ namespace StreamDeckMicrosoftFabric.Services
             {
                 _lastJobLocation = response.Headers.Location;
                 _logger.LogInformation($"Job started. Job location: {_lastJobLocation}");
-                return await Task.FromResult("images/Fabric-updating.png");
+                return true;
             }
             else
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 _logger.LogError($"Failed to run job {jobId}. Error {responseContent}");
-                return await Task.FromResult("images/Fabric-failed.png");
+                fabricSettingsModel.ErrorMessage = responseContent;
+                return false;
             }
         }
 
-        public async Task<JobRunStatus> CheckLastJobStatusAsync()
+        /// <summary>
+        /// Check the status of the last started job.
+        /// Use LastJobItemStatus to get the result.
+        /// </summary>
+        /// <returns></returns>
+        public async Task CheckLastJobStatusAsync()
         {
             // Try to enter the semaphore, but don't wait if it's already taken
             if (!await _statusCheckSemaphore.WaitAsync(0))
             {
                 _logger.LogInformation("Status check already in progress, skipping duplicate call");
-                return LastJobItemStatus; // Return the current status instead of making a duplicate call
+                return; // Return the current status instead of making a duplicate call
+            }
+
+            if(_lastJobLocation == null)
+            {
+                _logger.LogWarning("No job has been started yet.");
+                LastJobItemStatus = JobRunStatus.NotInitialized;
+                return;
             }
 
             try
@@ -92,19 +106,19 @@ namespace StreamDeckMicrosoftFabric.Services
                     {
                         LastJobItemStatus = JobRunStatus.Success;
                         _logger.LogInformation($"Job completed as success. Job location: {_lastJobLocation}");
-                        return await Task.FromResult(JobRunStatus.Success);
+                        return;
                     }
                     else if (responseJson["status"]?.ToString() == "Failed")
                     {
                         LastJobItemStatus = JobRunStatus.Failed;
                         _logger.LogInformation($"Job completed as a failure. Job location: {_lastJobLocation}");
-                        return await Task.FromResult(JobRunStatus.Failed);
+                        return;
                     }
                     else
                     {
                         LastJobItemStatus = JobRunStatus.Running;
                         _logger.LogInformation($"Job still running. Job location: {_lastJobLocation}");
-                        return await Task.FromResult(JobRunStatus.Running);
+                        return;
                     }
                 }
                 else
@@ -112,7 +126,7 @@ namespace StreamDeckMicrosoftFabric.Services
                     // Tell caller that job failed
                     LastJobItemStatus = JobRunStatus.Failed;
                     _logger.LogError($"Failed to check job status. Job location: {_lastJobLocation}");
-                    return await Task.FromResult(JobRunStatus.Failed);
+                    return;
                 }
             }
             finally
@@ -136,6 +150,8 @@ namespace StreamDeckMicrosoftFabric.Services
 
             // Need subscription id and location to get capacity usage.
             var url = "https://api.fabric.microsoft.com/v1/capacities/usages?api-version=2025-01-15-preview";
+            // This is sample url from Microsoft
+            //https://management.azure.com/subscriptions/548B7FB7-3B2A-4F46-BB02-66473F1FC22C/providers/Microsoft.Fabric/locations/centraluseuap/usages?api-version=2025-01-15-preview
 
             var response = await client.GetAsync(url);
             if (!response.IsSuccessStatusCode)
@@ -176,7 +192,7 @@ namespace StreamDeckMicrosoftFabric.Services
             {
                 SupportedActions.RunNotebook => "RunNotebook",
                 SupportedActions.RunDatapipeline => "Pipeline",
-                SupportedActions.RunDataFlow => "Publish",
+                SupportedActions.RunDataFlow => "Refresh",
                 _ => "RunNotebook",
             };
         }

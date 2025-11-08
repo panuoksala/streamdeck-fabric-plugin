@@ -73,11 +73,6 @@ namespace StreamDeckMicrosoftFabric
                 {
                     await UpdateDisplay(args);
                 }
-
-                if ((StatusUpdateFrequency)SettingsModel.UpdateStatusEverySecond != StatusUpdateFrequency.Never)
-                {
-                    StartBackgroundTask(args);
-                }
             }
             catch (Exception ex)
             {
@@ -144,7 +139,7 @@ namespace StreamDeckMicrosoftFabric
                     await OnError(args, ex);
                 }
             }
-        }        
+        }
 
         public async Task<FabricService.JobRunStatus> UpdateStatus(string context)
         {
@@ -153,10 +148,10 @@ namespace StreamDeckMicrosoftFabric
                 if (_service.LastJobItemStatus == FabricService.JobRunStatus.Running)
                 {
                     // Job is still running, check status
-                    var jobStatus = await _service.CheckLastJobStatusAsync();
-                    await Manager.SetImageAsync(context, ConvertJobStatusToImage(jobStatus));
+                    await _service.CheckLastJobStatusAsync();
+                    await Manager.SetImageAsync(context, ConvertJobStatusToImage(_service.LastJobItemStatus));
 
-                    return jobStatus;
+                    return _service.LastJobItemStatus;
                 }
             }
             catch (Exception ex)
@@ -244,26 +239,32 @@ namespace StreamDeckMicrosoftFabric
 
                 await Manager.SetImageAsync(args.context, "images/Fabric-updating.png");
 
-                await _service.RunJob(SettingsModel.WorkspaceId, SettingsModel.ResourceId, action);
-                // Wait 3000ms to let the job start
-                await Task.Delay(TimeSpan.FromSeconds(3));
-
-                var status = await _service.CheckLastJobStatusAsync();
-                await Manager.SetImageAsync(args.context, ConvertJobStatusToImage(status));
-
-                if ((StatusUpdateFrequency)SettingsModel.UpdateStatusEverySecond != StatusUpdateFrequency.Never)
+                var runJobSucceeded = await _service.RunJob(SettingsModel.WorkspaceId, SettingsModel.ResourceId, action);
+                if (runJobSucceeded)
                 {
-                    // Start background task to check status later
-                    StartBackgroundTask(args);
+                    // Wait 3000ms to let the job start
+                    await Task.Delay(TimeSpan.FromSeconds(3));
+                    await _service.CheckLastJobStatusAsync();
+                    await Manager.SetImageAsync(args.context, ConvertJobStatusToImage(_service.LastJobItemStatus));
+
+                    if ((StatusUpdateFrequency)SettingsModel.UpdateStatusEverySecond != StatusUpdateFrequency.Never)
+                    {
+                        // Start background task to check status later
+                        StartBackgroundTask(args);
+                    }
+                    else
+                    {
+                        if (_service.LastJobItemStatus == FabricService.JobRunStatus.Running)
+                        {
+                            // There won't be later check so always set to success to avoid in progress image
+                            // If it is failed to start we will leave that icon as is
+                            await Manager.SetImageAsync(args.context, "images/Fabric-success.png");
+                        }
+                    }
                 }
                 else
                 {
-                    if (status == FabricService.JobRunStatus.Running)
-                    {
-                        // There won't be later check so always set to success to avoid in progress image
-                        // If it is failed to start we will leave that icon as is
-                        await Manager.SetImageAsync(args.context, "images/Fabric-success.png");
-                    }
+                    await Manager.SetImageAsync(args.context, "images/Fabric-failed.png");
                 }
 
                 await Manager.SetSettingsAsync(args.context, SettingsModel);
