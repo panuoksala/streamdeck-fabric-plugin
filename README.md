@@ -6,6 +6,8 @@ Source code of Microsoft Fabric plugin by Panu Oksala for [Elgato Stream Deck][S
 Project is created by using the [Stream Deck C# Toolkit][Stream Deck C# Toolkit Homepage].
 Use GitHub issues to submit any bugs / feature requests.
 
+The plugin is now available at [Elgato marketplace](https://marketplace.elgato.com/product/fabric-deck-42f2b301-2354-4a97-ac4a-7c1a77ee1d27)
+
 ## How to use this plugin
 
 Install the plugin from Stream Deck Store. Use Interactive login method (ie. browser) or Entra service principal to authenticate againsts Fabric.
