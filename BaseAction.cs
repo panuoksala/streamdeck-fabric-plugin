@@ -101,9 +101,20 @@ namespace StreamDeckMicrosoftFabric
             return Task.CompletedTask;
         }
 
-        protected bool IsSettingsValid()
+        protected virtual bool IsSettingsValid()
         {
-            return SettingsModel.IsValid();
+            var action = ResolveAction();
+
+            return action switch
+            {
+                SupportedActions.GetCapacityUsage => !string.IsNullOrWhiteSpace(SettingsModel.ResourceId),
+                SupportedActions.Deploy =>
+                    !string.IsNullOrWhiteSpace(SettingsModel.ResourceId) &&
+                    Guid.TryParse(SettingsModel.SourceStageId, out _) &&
+                    Guid.TryParse(SettingsModel.TargetStageId, out _) &&
+                    !string.IsNullOrWhiteSpace(SettingsModel.TenantId),
+                _ => SettingsModel.IsValid(),
+            };
         }
 
         protected void StartBackgroundTask(StreamDeckEventPayload args)

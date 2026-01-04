@@ -6,6 +6,19 @@ var websocket = null,
     actionInfo = {},
     settingsModel = {};
 
+const normalizeStageValue = (value) => {
+    if (value === undefined || value === null) {
+        return '';
+    }
+
+    return value.toString().trim();
+};
+
+const ACTION_IDS = {
+    CONSUMPTION: 'net.fabricdeck.microsoftfabric.consumptionrunner',
+    DEPLOY: 'net.fabricdeck.microsoftfabric.deployrunner'
+};
+
 function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
     uuid = inUUID;
     actionInfo = JSON.parse(inActionInfo);
@@ -13,17 +26,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
     websocket = new WebSocket('ws://localhost:' + inPort);
 
     try {
-        // If this is the consumption runner action, adjust label
-        if (actionInfo.action === 'net.fabricdeck.microsoftfabric.consumptionrunner') {
-            const labelEl = document.getElementById('resource_id_label');
-            if (labelEl) {
-                labelEl.innerText = 'Fabric Consumption Name';
-            }
-            const inputEl = document.getElementById('txtResourceId');
-            if (inputEl) {
-                inputEl.placeholder = 'Fabric Consumption Name';
-            }
-        }
+        configureUiForAction(actionInfo.action);
 
         // initialize values
         if (actionInfo.payload.settings.settingsModel) {
@@ -35,6 +38,8 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             settingsModel.UpdateStatusEverySecond = actionInfo.payload.settings.settingsModel.UpdateStatusEverySecond;
             settingsModel.ErrorMessage = actionInfo.payload.settings.settingsModel.ErrorMessage;
             settingsModel.LoginMethod = actionInfo.payload.settings.settingsModel.LoginMethod;
+            settingsModel.SourceStageId = normalizeStageValue(actionInfo.payload.settings.settingsModel.SourceStageId);
+            settingsModel.TargetStageId = normalizeStageValue(actionInfo.payload.settings.settingsModel.TargetStageId);
         } else {
             settingsModel.WorkspaceId = "";
             settingsModel.ResourceId = "";
@@ -43,6 +48,8 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             settingsModel.ClientId = "";
             settingsModel.TenantId = "";
             settingsModel.Secret = "";
+            settingsModel.SourceStageId = "";
+            settingsModel.TargetStageId = "";
         }
 
         document.getElementById('txtWorkspaceId').value = settingsModel.WorkspaceId;
@@ -50,6 +57,8 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
         document.getElementById('txtClientId').value = settingsModel.ClientId;
         document.getElementById('txtSecret').value = settingsModel.Secret;
         document.getElementById('txtTenantId').value = settingsModel.TenantId;
+        document.getElementById('txtSourceStageId').value = settingsModel.SourceStageId;
+        document.getElementById('txtTargetStageId').value = settingsModel.TargetStageId;
         document.getElementById('update_status_every_second').value = settingsModel.UpdateStatusEverySecond;
         document.getElementById('loginmethod').value = settingsModel.LoginMethod;
         document.getElementById('error_message').innerHTML = settingsModel.ErrorMessage;
@@ -94,6 +103,14 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         settingsModel.UpdateStatusEverySecond = jsonObj.payload.settings.settingsModel.UpdateStatusEverySecond;
                         document.getElementById('update_status_every_second').value = settingsModel.UpdateStatusEverySecond;
                     }
+                    if (jsonObj.payload.settings.settingsModel.SourceStageId !== undefined) {
+                        settingsModel.SourceStageId = normalizeStageValue(jsonObj.payload.settings.settingsModel.SourceStageId);
+                        document.getElementById('txtSourceStageId').value = settingsModel.SourceStageId;
+                    }
+                    if (jsonObj.payload.settings.settingsModel.TargetStageId !== undefined) {
+                        settingsModel.TargetStageId = normalizeStageValue(jsonObj.payload.settings.settingsModel.TargetStageId);
+                        document.getElementById('txtTargetStageId').value = settingsModel.TargetStageId;
+                    }
                     break;
                 default:
                     break;
@@ -102,6 +119,34 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
     } catch (err) {
         // Enable for debugging, but don't leave on in production
         // alert(err);
+    }
+}
+
+function configureUiForAction(actionId) {
+    const resourceLabel = document.getElementById('resource_id_label');
+    const resourceInput = document.getElementById('txtResourceId');
+    const workspaceSection = document.getElementById('workspace_settings');
+    const deploymentSection = document.getElementById('deployment_settings');
+
+    if (!resourceLabel || !resourceInput || !workspaceSection || !deploymentSection) {
+        return;
+    }
+
+    if (actionId === ACTION_IDS.CONSUMPTION) {
+        resourceLabel.innerText = 'Fabric Consumption Name';
+        resourceInput.placeholder = 'Fabric Consumption Name';
+        workspaceSection.style.display = 'block';
+        deploymentSection.style.display = 'none';
+    } else if (actionId === ACTION_IDS.DEPLOY) {
+        resourceLabel.innerText = 'Deployment Pipeline Id';
+        resourceInput.placeholder = 'Deployment Pipeline Id';
+        workspaceSection.style.display = 'none';
+        deploymentSection.style.display = 'block';
+    } else {
+        resourceLabel.innerText = 'Fabric Resource Id';
+        resourceInput.placeholder = 'Fabric Resource Id.';
+        workspaceSection.style.display = 'block';
+        deploymentSection.style.display = 'none';
     }
 }
 
@@ -120,6 +165,10 @@ const setSettings = (value, param) => {
         }
 
         if (websocket) {
+            if (param === 'SourceStageId' || param === 'TargetStageId') {
+                value = normalizeStageValue(value);
+            }
+
             settingsModel[param] = value;
             var json = {
                 "event": "setSettings",

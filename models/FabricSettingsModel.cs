@@ -18,6 +18,16 @@ namespace StreamDeckMicrosoftFabric.Models
         public string ResourceId { get; set; } = "";
 
         /// <summary>
+        /// Deployment pipeline source stage identifier (GUID)
+        /// </summary>
+        public string SourceStageId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Deployment pipeline target stage identifier (GUID)
+        /// </summary>
+        public string TargetStageId { get; set; } = string.Empty;
+
+        /// <summary>
         /// Client id from app registration that has access to Fabric.
         /// Plugin currently uses interactive authentication as Fabric does not support anything else at the moment.
         /// So no need to provide client secret.
@@ -52,7 +62,7 @@ namespace StreamDeckMicrosoftFabric.Models
 
         public bool IsValid()
         {
-            return !string.IsNullOrWhiteSpace(WorkspaceId);
+            return !string.IsNullOrWhiteSpace(WorkspaceId) && !string.IsNullOrWhiteSpace(ResourceId);
         }
 
         public int GetUpdateStatusInSeconds()

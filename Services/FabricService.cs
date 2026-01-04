@@ -4,6 +4,7 @@ using StreamDeckMicrosoftFabric.Models;
 using System;
 using System.Data;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
@@ -27,6 +28,7 @@ namespace StreamDeckMicrosoftFabric.Services
         private readonly ILogger _logger = logger;
         private readonly IHttpClientFactory _clientFactory = httpClientFactory;
         private readonly LoginService _login = loginService;
+        private readonly FabricSettingsModel _settings = fabricSettingsModel;
         private Uri _lastJobLocation = null;
         private readonly SemaphoreSlim _statusCheckSemaphore = new SemaphoreSlim(1, 1);
 
@@ -38,6 +40,11 @@ namespace StreamDeckMicrosoftFabric.Services
             {
                 // Not a runnable job type; caller should invoke GetCapacityUsageAsync instead.
                 return true;
+            }
+
+            if (actionType == SupportedActions.Deploy)
+            {
+                return await RunDeploymentAsync(jobId);
             }
 
             _logger.LogInformation($"Running job {jobId}.");
@@ -59,13 +66,14 @@ namespace StreamDeckMicrosoftFabric.Services
             {
                 _lastJobLocation = response.Headers.Location;
                 _logger.LogInformation($"Job started. Job location: {_lastJobLocation}");
+                LastJobItemStatus = JobRunStatus.Running;
                 return true;
             }
             else
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 _logger.LogError($"Failed to run job {jobId}. Error {responseContent}");
-                fabricSettingsModel.ErrorMessage = responseContent;
+                _settings.ErrorMessage = responseContent;
                 return false;
             }
         }
@@ -84,10 +92,17 @@ namespace StreamDeckMicrosoftFabric.Services
                 return; // Return the current status instead of making a duplicate call
             }
 
-            if(_lastJobLocation == null)
+            if (_lastJobLocation == null)
             {
-                _logger.LogWarning("No job has been started yet.");
-                LastJobItemStatus = JobRunStatus.NotInitialized;
+                if (LastJobItemStatus != JobRunStatus.Success)
+                {
+                    _logger.LogWarning("No job has been started yet.");
+                    LastJobItemStatus = JobRunStatus.NotInitialized;
+                }
+                else
+                {
+                    _logger.LogInformation("Job completed synchronously; no status polling endpoint available.");
+                }
                 return;
             }
 
@@ -102,13 +117,16 @@ namespace StreamDeckMicrosoftFabric.Services
                     _logger.LogInformation($"Job status checked. Job location: {_lastJobLocation}");
                     var responseJson = await JsonNode.ParseAsync(await response.Content.ReadAsStreamAsync());
 
-                    if (responseJson["status"]?.ToString() == "Completed")
+                    var status = responseJson["status"]?.ToString();
+
+                    if (string.Equals(status, "Completed", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(status, "Succeeded", StringComparison.OrdinalIgnoreCase))
                     {
                         LastJobItemStatus = JobRunStatus.Success;
                         _logger.LogInformation($"Job completed as success. Job location: {_lastJobLocation}");
                         return;
                     }
-                    else if (responseJson["status"]?.ToString() == "Failed")
+                    else if (string.Equals(status, "Failed", StringComparison.OrdinalIgnoreCase))
                     {
                         LastJobItemStatus = JobRunStatus.Failed;
                         _logger.LogInformation($"Job completed as a failure. Job location: {_lastJobLocation}");
@@ -184,6 +202,48 @@ namespace StreamDeckMicrosoftFabric.Services
 
             _logger.LogWarning("Capacity with name '{CapacityName}' not found in usage list.", capacityName);
             return null;
+        }
+
+        private async Task<bool> RunDeploymentAsync(string deploymentPipelineId)
+        {
+            var hasSourceStageId = Guid.TryParse(_settings.SourceStageId, out var sourceStageId);
+            var hasTargetStageId = Guid.TryParse(_settings.TargetStageId, out var targetStageId);
+
+            if (string.IsNullOrWhiteSpace(deploymentPipelineId) || !hasSourceStageId || !hasTargetStageId)
+            {
+                _settings.ErrorMessage = "Deployment pipeline id and valid source and target stage ids are required.";
+                _logger.LogWarning("Missing deployment configuration. PipelineId: {PipelineId}, SourceStageId: {SourceStageId}, TargetStageId: {TargetStageId}",
+                    deploymentPipelineId, _settings.SourceStageId, _settings.TargetStageId);
+                return false;
+            }
+
+            var client = _clientFactory.CreateClient();
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_login.AccessToken}");
+
+            var payload = new
+            {
+                sourceStageId,
+                targetStageId
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var url = $"https://api.fabric.microsoft.com/v1/deploymentPipelines/{deploymentPipelineId}/deploy";
+            var response = await client.PostAsync(url, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _lastJobLocation = response.Headers.Location;
+                LastJobItemStatus = _lastJobLocation is null ? JobRunStatus.Success : JobRunStatus.Running;
+                _logger.LogInformation("Deployment triggered for pipeline {PipelineId}. Operation location: {Location}", deploymentPipelineId, _lastJobLocation);
+                return true;
+            }
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _settings.ErrorMessage = responseContent;
+            _logger.LogError("Failed to deploy pipeline {PipelineId}. Error {Error}", deploymentPipelineId, responseContent);
+            return false;
         }
 
         private static string ResolveApiJobType(SupportedActions action)

@@ -12,13 +12,25 @@
             <div class="sdpi-item-label">Tenant Id</div>
             <input id="txtTenantId" class="sdpi-item-value" type="text" placeholder="Tenant Id." onKeyUp="setSettings(event.target.value, 'TenantId')" required />
         </div>
-        <div class="sdpi-item" id="workspace_id" type="field">
-            <div class="sdpi-item-label">Workspace Id</div>
-            <input id="txtWorkspaceId" class="sdpi-item-value" type="text" placeholder="Workspace Id. Use Me for own workspace." onKeyUp="setSettings(event.target.value, 'WorkspaceId')" required />
+        <div id="workspace_settings" style="display: block;">
+            <div class="sdpi-item" id="workspace_id" type="field">
+                <div class="sdpi-item-label">Workspace Id</div>
+                <input id="txtWorkspaceId" class="sdpi-item-value" type="text" placeholder="Workspace Id. Use Me for own workspace." onKeyUp="setSettings(event.target.value, 'WorkspaceId')" required />
+            </div>
         </div>
         <div class="sdpi-item" id="resource_id" type="field">
             <div class="sdpi-item-label" id="resource_id_label">Fabric Resource Id</div>
             <input id="txtResourceId" class="sdpi-item-value" type="text" placeholder="Fabric Resource Id." onKeyUp="setSettings(event.target.value, 'ResourceId')" required />
+        </div>
+        <div id="deployment_settings" style="display: none;">
+            <div class="sdpi-item" id="source_stage" type="field">
+                <div class="sdpi-item-label">Source Stage Id</div>
+                <input id="txtSourceStageId" class="sdpi-item-value" type="text" placeholder="Source Stage Id (GUID)" spellcheck="false" oninput="setSettings(event.target.value, 'SourceStageId')" />
+            </div>
+            <div class="sdpi-item" id="target_stage" type="field">
+                <div class="sdpi-item-label">Target Stage Id</div>
+                <input id="txtTargetStageId" class="sdpi-item-value" type="text" placeholder="Target Stage Id (GUID)" spellcheck="false" oninput="setSettings(event.target.value, 'TargetStageId')" />
+            </div>
         </div>
         <div class="sdpi-item" id="select_loginmethod">
             <div class="sdpi-item-label">Login Method</div>

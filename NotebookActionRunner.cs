@@ -10,6 +10,7 @@ namespace StreamDeckMicrosoftFabric
         RunDatapipeline = 1,
         RunDataFlow = 2,
         GetCapacityUsage = 3, // New action to retrieve Fabric capacity CU usage
+        Deploy = 4,
     }
 
     /// <summary>
