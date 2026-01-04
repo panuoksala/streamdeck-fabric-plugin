@@ -72,13 +72,8 @@ jobs:
     
     - name: Build for Windows
       run: |
-        dotnet build StreamDeckMicrosoftFabric.csproj --configuration Release --runtime win-x64 --no-restore
-        dotnet publish StreamDeckMicrosoftFabric.csproj --configuration Release --runtime win-x64 --no-build --output ./publish/win-x64
-    
-    - name: Build for macOS
-      run: |
-        dotnet build StreamDeckMicrosoftFabric.csproj --configuration Release --runtime osx-x64 --no-restore
-        dotnet publish StreamDeckMicrosoftFabric.csproj --configuration Release --runtime osx-x64 --no-build --output ./publish/osx-x64
+        dotnet build StreamDeckMicrosoftFabric.csproj --configuration Release
+        dotnet publish StreamDeckMicrosoftFabric.csproj --configuration Release --runtime win-x64 --self-contained --output ./publish
     
     - name: Prepare plugin structure
       run: |
@@ -86,15 +81,11 @@ jobs:
         $pluginDir = "net.fabricdeck.microsoftfabric.sdPlugin"
         New-Item -ItemType Directory -Force -Path $pluginDir
         
-        # Copy Windows build
-        New-Item -ItemType Directory -Force -Path "$pluginDir\win"
-        Copy-Item -Path ".\publish\win-x64\*" -Destination "$pluginDir\win" -Recurse -Force
+        # Copy Windows build files directly to plugin directory
+        Copy-Item -Path ".\publish\*" -Destination $pluginDir -Recurse -Force
         
-        # Copy macOS build
-        New-Item -ItemType Directory -Force -Path "$pluginDir\mac"
-        Copy-Item -Path ".\publish\osx-x64\*" -Destination "$pluginDir\mac" -Recurse -Force
-        
-        # Copy manifest and other required files to root
+        # Copy manifest and other required files (they should already be in publish folder due to csproj settings)
+        # But copy them again to ensure they're at the root level
         Copy-Item -Path "manifest.json" -Destination $pluginDir -Force
         Copy-Item -Path "images" -Destination $pluginDir -Recurse -Force
         Copy-Item -Path "property_inspector" -Destination $pluginDir -Recurse -Force
