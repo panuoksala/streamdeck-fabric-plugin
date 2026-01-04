@@ -22,6 +22,8 @@ Install the plugin from Stream Deck Store. Use Interactive login method (ie. bro
 | Fabric Resource Id        |Notebook or Data pipeline identifier (copy from URL).|
 | Login Method              |Interactive to use your own credentials, or service principal for app registration.|
 | Status update frequency   |How often device will update the display after action invocation. Set longer if you are getting incorrect information.|
+| Source Stage Id           |Only visible when using Deploy type of action. Use Fabric API deploymentPipelines/{id}/stages to retrieve list of stage ids|
+| Target Stage Id           |Target stage id in deployment pipeline. See above on how to fetch this value.|
 
 After successfull action run the Stream Deck button will show OK sign for a short while.
 If Stream Deck shows red question icon on top right corner of the button, check logs from plugin folder for more details.
