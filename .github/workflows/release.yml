@@ -51,23 +51,19 @@ jobs:
       with:
         dotnet-version: '6.0.x'
     
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
     - name: Install Stream Deck CLI
       run: |
-        # Download and install Stream Deck CLI
-        $cliUrl = "https://github.com/elgatosf/cli/releases/latest/download/streamdeck-cli-windows-x64.zip"
-        $cliPath = "${{ runner.temp }}\streamdeck-cli"
-        
-        Write-Host "Downloading Stream Deck CLI..."
-        Invoke-WebRequest -Uri $cliUrl -OutFile "${{ runner.temp }}\streamdeck-cli.zip"
-        
-        Write-Host "Extracting Stream Deck CLI..."
-        Expand-Archive -Path "${{ runner.temp }}\streamdeck-cli.zip" -DestinationPath $cliPath -Force
-        
-        # Add to PATH
-        echo "$cliPath" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        Write-Host "Installing Stream Deck CLI via npm..."
+        npm install -g @elgato/cli@latest
         
         # Verify installation
-        & "$cliPath\streamdeck.exe" --version
+        Write-Host "Verifying Stream Deck CLI installation..."
+        streamdeck --version
       shell: pwsh
     
     - name: Restore dependencies
@@ -120,8 +116,7 @@ jobs:
         Write-Host "Packaging plugin version: $version"
         
         # Run streamdeck pack command
-        $cliPath = "${{ runner.temp }}\streamdeck-cli"
-        & "$cliPath\streamdeck.exe" pack net.fabricdeck.microsoftfabric.sdPlugin --output "FabricDeck-$version.streamDeckPlugin"
+        streamdeck pack net.fabricdeck.microsoftfabric.sdPlugin --output "FabricDeck-$version.streamDeckPlugin"
         
         # Verify the package was created
         if (Test-Path "FabricDeck-$version.streamDeckPlugin") {
@@ -152,89 +147,3 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  build-and-package-macos:
-    runs-on: macos-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Update version in manifest.json (macOS)
-      run: |
-        # Get version from tag or input
-        VERSION="${{ github.event.inputs.version }}"
-        if [ -z "$VERSION" ]; then
-          VERSION="${{ github.ref_name }}"
-          VERSION="${VERSION#v}"
-        fi
-        
-        # Add .0 at the end to match the format x.x.x.0
-        MANIFEST_VERSION="${VERSION}.0"
-        
-        echo "Updating manifest.json with version: $MANIFEST_VERSION"
-        
-        # Update version in manifest.json using sed (macOS compatible)
-        sed -i '' "s/\"Version\": \"[^\"]*\"/\"Version\": \"$MANIFEST_VERSION\"/" manifest.json
-        
-        echo "manifest.json updated successfully"
-        echo "New version:"
-        grep "Version" manifest.json
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '6.0.x'
-    
-    - name: Install Stream Deck CLI
-      run: |
-        # Download and install Stream Deck CLI for macOS
-        CLI_URL="https://github.com/elgatosf/cli/releases/latest/download/streamdeck-cli-macos-universal.zip"
-        CLI_PATH="${{ runner.temp }}/streamdeck-cli"
-        
-        echo "Downloading Stream Deck CLI..."
-        curl -L -o "${{ runner.temp }}/streamdeck-cli.zip" "$CLI_URL"
-        
-        echo "Extracting Stream Deck CLI..."
-        unzip -o "${{ runner.temp }}/streamdeck-cli.zip" -d "$CLI_PATH"
-        
-        # Make executable
-        chmod +x "$CLI_PATH/streamdeck"
-        
-        # Add to PATH
-        echo "$CLI_PATH" >> $GITHUB_PATH
-        
-        # Verify installation
-        "$CLI_PATH/streamdeck" --version
-    
-    - name: Build for macOS (native)
-      run: |
-        dotnet restore StreamDeckMicrosoftFabric.sln
-        dotnet build StreamDeckMicrosoftFabric.sln --configuration Release --runtime osx-x64
-        dotnet publish StreamDeckMicrosoftFabric.csproj --configuration Release --runtime osx-x64 --no-build --output ./publish/osx-x64
-    
-    - name: Verify macOS build
-      run: |
-        # Create plugin directory structure for testing
-        PLUGIN_DIR="net.fabricdeck.microsoftfabric.sdPlugin"
-        mkdir -p "$PLUGIN_DIR/mac"
-        
-        # Copy macOS build
-        cp -R ./publish/osx-x64/* "$PLUGIN_DIR/mac/"
-        
-        # Copy manifest and other required files
-        cp manifest.json "$PLUGIN_DIR/"
-        cp -R images "$PLUGIN_DIR/"
-        cp -R property_inspector "$PLUGIN_DIR/"
-        
-        # List files to verify
-        echo "Plugin structure:"
-        find "$PLUGIN_DIR" -type f | head -20
-        
-        # Check if executable exists and is valid
-        if [ -f "$PLUGIN_DIR/mac/StreamDeckMicrosoftFabric" ]; then
-          echo "macOS executable found"
-          file "$PLUGIN_DIR/mac/StreamDeckMicrosoftFabric"
-        else
-          echo "ERROR: macOS executable not found"
-          exit 1
-        fi
