@@ -68,16 +68,16 @@ jobs:
       shell: pwsh
     
     - name: Restore dependencies
-      run: dotnet restore StreamDeckMicrosoftFabric.sln
+      run: dotnet restore StreamDeckMicrosoftFabric.csproj
     
     - name: Build for Windows
       run: |
-        dotnet build StreamDeckMicrosoftFabric.sln --configuration Release --runtime win-x64 --no-restore
+        dotnet build StreamDeckMicrosoftFabric.csproj --configuration Release --runtime win-x64 --no-restore
         dotnet publish StreamDeckMicrosoftFabric.csproj --configuration Release --runtime win-x64 --no-build --output ./publish/win-x64
     
     - name: Build for macOS
       run: |
-        dotnet build StreamDeckMicrosoftFabric.sln --configuration Release --runtime osx-x64 --no-restore
+        dotnet build StreamDeckMicrosoftFabric.csproj --configuration Release --runtime osx-x64 --no-restore
         dotnet publish StreamDeckMicrosoftFabric.csproj --configuration Release --runtime osx-x64 --no-build --output ./publish/osx-x64
     
     - name: Prepare plugin structure
