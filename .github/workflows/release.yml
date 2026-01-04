@@ -61,9 +61,10 @@ jobs:
         Write-Host "Installing Stream Deck CLI via npm..."
         npm install -g @elgato/cli@latest
         
-        # Verify installation
+        # Verify installation by checking if command exists
         Write-Host "Verifying Stream Deck CLI installation..."
-        streamdeck --version
+        Get-Command streamdeck -ErrorAction Stop
+        Write-Host "Stream Deck CLI installed successfully"
       shell: pwsh
     
     - name: Restore dependencies
