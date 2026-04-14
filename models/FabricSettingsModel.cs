@@ -28,6 +28,11 @@ namespace StreamDeckMicrosoftFabric.Models
         public string TargetStageId { get; set; } = string.Empty;
 
         /// <summary>
+        /// User Data Function JSON payload
+        /// </summary>
+        public string UdfPayloadJson { get; set; } = "";
+
+        /// <summary>
         /// User Data Function parameter 1 name
         /// </summary>
         public string UdfParam1Name { get; set; } = "";

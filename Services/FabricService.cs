@@ -50,7 +50,7 @@ namespace StreamDeckMicrosoftFabric.Services
 
             if (actionType == SupportedActions.RunUserDataFunction)
             {
-                return await RunUserDataFunctionAsync(workspaceId, jobId);
+                return await RunUserDataFunctionAsync(jobId);
             }
 
             _logger.LogInformation($"Running job {jobId}.");
@@ -210,46 +210,73 @@ namespace StreamDeckMicrosoftFabric.Services
             return null;
         }
 
-        private async Task<bool> RunUserDataFunctionAsync(string workspaceId, string functionId)
+        private async Task<bool> RunUserDataFunctionAsync(string functionUrl)
         {
-            if (string.IsNullOrWhiteSpace(workspaceId) || string.IsNullOrWhiteSpace(functionId))
+            if (string.IsNullOrWhiteSpace(functionUrl))
             {
-                _settings.ErrorMessage = "Workspace id and User Data Function id are required.";
-                _logger.LogWarning("Missing UDF configuration. WorkspaceId: {WorkspaceId}, FunctionId: {FunctionId}", workspaceId, functionId);
+                _settings.ErrorMessage = "User Data Function URL is required.";
+                _logger.LogWarning("Missing User Data Function URL.");
                 return false;
             }
 
             var client = _clientFactory.CreateClient();
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_login.AccessToken}");
 
-            var parameters = BuildUdfParameters();
-            var url = $"https://api.fabric.microsoft.com/v1/workspaces/{workspaceId}/userDataFunctions/{functionId}/jobs/instances?jobType=UserDataFunctionsRun";
-
-            System.Net.Http.HttpContent content = null;
-            if (parameters.Count > 0)
+            if (!TryBuildUdfParametersJson(out var json))
             {
-                var body = new { executionData = new { parameters } };
-                var json = JsonSerializer.Serialize(body);
-                content = new StringContent(json, Encoding.UTF8, "application/json");
+                return false;
             }
 
-            var response = await client.PostAsync(url, content);
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync(functionUrl, content);
 
             if (response.IsSuccessStatusCode)
             {
-                _lastJobLocation = response.Headers.Location;
-                LastJobItemStatus = _lastJobLocation is null ? JobRunStatus.Success : JobRunStatus.Running;
-                _logger.LogInformation("User Data Function triggered for function {FunctionId}. Operation location: {Location}", functionId, _lastJobLocation);
+                _lastJobLocation = null;
+                LastJobItemStatus = JobRunStatus.Success;
+                _logger.LogInformation("User Data Function invoked successfully. URL: {Url}", functionUrl);
                 return true;
             }
 
             var responseContent = await response.Content.ReadAsStringAsync();
             _settings.ErrorMessage = responseContent;
-            _logger.LogError("Failed to run User Data Function {FunctionId}. Error {Error}", functionId, responseContent);
+            _logger.LogError("Failed to invoke User Data Function. URL: {Url}. Error: {Error}", functionUrl, responseContent);
             return false;
         }
 
-        private Dictionary<string, object> BuildUdfParameters()
+        private bool TryBuildUdfParametersJson(out string json)
+        {
+            if (!string.IsNullOrWhiteSpace(_settings.UdfPayloadJson))
+            {
+                try
+                {
+                    var payload = JsonNode.Parse(_settings.UdfPayloadJson);
+                    if (payload is not JsonObject jsonObject)
+                    {
+                        _settings.ErrorMessage = "UDF payload must be a JSON object.";
+                        _logger.LogWarning("Invalid UDF payload. Root element must be a JSON object.");
+                        json = string.Empty;
+                        return false;
+                    }
+
+                    json = jsonObject.ToJsonString();
+                    return true;
+                }
+                catch (JsonException ex)
+                {
+                    _settings.ErrorMessage = $"Invalid UDF payload JSON: {ex.Message}";
+                    _logger.LogWarning(ex, "Invalid UDF payload JSON.");
+                    json = string.Empty;
+                    return false;
+                }
+            }
+
+            json = JsonSerializer.Serialize(BuildLegacyUdfParameters());
+            return true;
+        }
+
+        private Dictionary<string, object> BuildLegacyUdfParameters()
         {
             var result = new Dictionary<string, object>();
 

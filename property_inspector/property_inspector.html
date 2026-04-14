@@ -12,11 +12,9 @@
             <div class="sdpi-item-label">Tenant Id</div>
             <input id="txtTenantId" class="sdpi-item-value" type="text" placeholder="Tenant Id." onKeyUp="setSettings(event.target.value, 'TenantId')" required />
         </div>
-        <div id="workspace_settings" style="display: block;">
-            <div class="sdpi-item" id="workspace_id" type="field">
-                <div class="sdpi-item-label">Workspace Id</div>
-                <input id="txtWorkspaceId" class="sdpi-item-value" type="text" placeholder="Workspace Id. Use Me for own workspace." onKeyUp="setSettings(event.target.value, 'WorkspaceId')" required />
-            </div>
+        <div class="sdpi-item" id="workspace_id" type="field">
+            <div class="sdpi-item-label">Workspace Id</div>
+            <input id="txtWorkspaceId" class="sdpi-item-value" type="text" placeholder="Workspace Id." onKeyUp="setSettings(event.target.value, 'WorkspaceId')" required />
         </div>
         <div class="sdpi-item" id="resource_id" type="field">
             <div class="sdpi-item-label" id="resource_id_label">Fabric Resource Id</div>
@@ -34,34 +32,8 @@
         </div>
         <div id="udf_settings" style="display: none;">
             <div class="sdpi-item" type="field">
-                <div class="sdpi-item-label">Parameter 1</div>
-                <input id="txtUdfParam1Name" class="sdpi-item-value" style="width:38%" type="text" placeholder="Name" oninput="setSettings(event.target.value, 'UdfParam1Name')" />
-                <select id="selUdfParam1Type" style="width:20%" onchange="setSettings(parseInt(event.target.value), 'UdfParam1Type')">
-                    <option value="0">String</option>
-                    <option value="1">Integer</option>
-                    <option value="2">Boolean</option>
-                </select>
-                <input id="txtUdfParam1Value" class="sdpi-item-value" style="width:38%" type="text" placeholder="Value" oninput="setSettings(event.target.value, 'UdfParam1Value')" />
-            </div>
-            <div class="sdpi-item" type="field">
-                <div class="sdpi-item-label">Parameter 2</div>
-                <input id="txtUdfParam2Name" class="sdpi-item-value" style="width:38%" type="text" placeholder="Name" oninput="setSettings(event.target.value, 'UdfParam2Name')" />
-                <select id="selUdfParam2Type" style="width:20%" onchange="setSettings(parseInt(event.target.value), 'UdfParam2Type')">
-                    <option value="0">String</option>
-                    <option value="1">Integer</option>
-                    <option value="2">Boolean</option>
-                </select>
-                <input id="txtUdfParam2Value" class="sdpi-item-value" style="width:38%" type="text" placeholder="Value" oninput="setSettings(event.target.value, 'UdfParam2Value')" />
-            </div>
-            <div class="sdpi-item" type="field">
-                <div class="sdpi-item-label">Parameter 3</div>
-                <input id="txtUdfParam3Name" class="sdpi-item-value" style="width:38%" type="text" placeholder="Name" oninput="setSettings(event.target.value, 'UdfParam3Name')" />
-                <select id="selUdfParam3Type" style="width:20%" onchange="setSettings(parseInt(event.target.value), 'UdfParam3Type')">
-                    <option value="0">String</option>
-                    <option value="1">Integer</option>
-                    <option value="2">Boolean</option>
-                </select>
-                <input id="txtUdfParam3Value" class="sdpi-item-value" style="width:38%" type="text" placeholder="Value" oninput="setSettings(event.target.value, 'UdfParam3Value')" />
+                <div class="sdpi-item-label">JSON Payload</div>
+                <textarea id="txtUdfPayloadJson" class="sdpi-item-value" style="min-height: 120px; resize: vertical;" placeholder='{"name":"value"}' spellcheck="false" oninput="setSettings(event.target.value, 'UdfPayloadJson')"></textarea>
             </div>
         </div>
         <div class="sdpi-item" id="select_loginmethod">

@@ -41,15 +41,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             settingsModel.LoginMethod = actionInfo.payload.settings.settingsModel.LoginMethod;
             settingsModel.SourceStageId = normalizeStageValue(actionInfo.payload.settings.settingsModel.SourceStageId);
             settingsModel.TargetStageId = normalizeStageValue(actionInfo.payload.settings.settingsModel.TargetStageId);
-            settingsModel.UdfParam1Name = actionInfo.payload.settings.settingsModel.UdfParam1Name || '';
-            settingsModel.UdfParam1Type = actionInfo.payload.settings.settingsModel.UdfParam1Type || 0;
-            settingsModel.UdfParam1Value = actionInfo.payload.settings.settingsModel.UdfParam1Value || '';
-            settingsModel.UdfParam2Name = actionInfo.payload.settings.settingsModel.UdfParam2Name || '';
-            settingsModel.UdfParam2Type = actionInfo.payload.settings.settingsModel.UdfParam2Type || 0;
-            settingsModel.UdfParam2Value = actionInfo.payload.settings.settingsModel.UdfParam2Value || '';
-            settingsModel.UdfParam3Name = actionInfo.payload.settings.settingsModel.UdfParam3Name || '';
-            settingsModel.UdfParam3Type = actionInfo.payload.settings.settingsModel.UdfParam3Type || 0;
-            settingsModel.UdfParam3Value = actionInfo.payload.settings.settingsModel.UdfParam3Value || '';
+            settingsModel.UdfPayloadJson = actionInfo.payload.settings.settingsModel.UdfPayloadJson || '';
         } else {
             settingsModel.WorkspaceId = "";
             settingsModel.ResourceId = "";
@@ -60,9 +52,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             settingsModel.Secret = "";
             settingsModel.SourceStageId = "";
             settingsModel.TargetStageId = "";
-            settingsModel.UdfParam1Name = ""; settingsModel.UdfParam1Type = 0; settingsModel.UdfParam1Value = "";
-            settingsModel.UdfParam2Name = ""; settingsModel.UdfParam2Type = 0; settingsModel.UdfParam2Value = "";
-            settingsModel.UdfParam3Name = ""; settingsModel.UdfParam3Type = 0; settingsModel.UdfParam3Value = "";
+            settingsModel.UdfPayloadJson = "";
         }
 
         document.getElementById('txtWorkspaceId').value = settingsModel.WorkspaceId;
@@ -72,15 +62,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
         document.getElementById('txtTenantId').value = settingsModel.TenantId;
         document.getElementById('txtSourceStageId').value = settingsModel.SourceStageId;
         document.getElementById('txtTargetStageId').value = settingsModel.TargetStageId;
-        document.getElementById('txtUdfParam1Name').value = settingsModel.UdfParam1Name;
-        document.getElementById('selUdfParam1Type').value = settingsModel.UdfParam1Type;
-        document.getElementById('txtUdfParam1Value').value = settingsModel.UdfParam1Value;
-        document.getElementById('txtUdfParam2Name').value = settingsModel.UdfParam2Name;
-        document.getElementById('selUdfParam2Type').value = settingsModel.UdfParam2Type;
-        document.getElementById('txtUdfParam2Value').value = settingsModel.UdfParam2Value;
-        document.getElementById('txtUdfParam3Name').value = settingsModel.UdfParam3Name;
-        document.getElementById('selUdfParam3Type').value = settingsModel.UdfParam3Type;
-        document.getElementById('txtUdfParam3Value').value = settingsModel.UdfParam3Value;
+        document.getElementById('txtUdfPayloadJson').value = settingsModel.UdfPayloadJson;
         document.getElementById('update_status_every_second').value = settingsModel.UpdateStatusEverySecond;
         document.getElementById('loginmethod').value = settingsModel.LoginMethod;
         document.getElementById('error_message').innerHTML = settingsModel.ErrorMessage;
@@ -133,21 +115,10 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         settingsModel.TargetStageId = normalizeStageValue(jsonObj.payload.settings.settingsModel.TargetStageId);
                         document.getElementById('txtTargetStageId').value = settingsModel.TargetStageId;
                     }
-                    ['1','2','3'].forEach(n => {
-                        const sm = jsonObj.payload.settings.settingsModel;
-                        if (sm['UdfParam' + n + 'Name'] !== undefined) {
-                            settingsModel['UdfParam' + n + 'Name'] = sm['UdfParam' + n + 'Name'];
-                            document.getElementById('txtUdfParam' + n + 'Name').value = settingsModel['UdfParam' + n + 'Name'];
-                        }
-                        if (sm['UdfParam' + n + 'Type'] !== undefined) {
-                            settingsModel['UdfParam' + n + 'Type'] = sm['UdfParam' + n + 'Type'];
-                            document.getElementById('selUdfParam' + n + 'Type').value = settingsModel['UdfParam' + n + 'Type'];
-                        }
-                        if (sm['UdfParam' + n + 'Value'] !== undefined) {
-                            settingsModel['UdfParam' + n + 'Value'] = sm['UdfParam' + n + 'Value'];
-                            document.getElementById('txtUdfParam' + n + 'Value').value = settingsModel['UdfParam' + n + 'Value'];
-                        }
-                    });
+                    if (jsonObj.payload.settings.settingsModel.UdfPayloadJson !== undefined) {
+                        settingsModel.UdfPayloadJson = jsonObj.payload.settings.settingsModel.UdfPayloadJson;
+                        document.getElementById('txtUdfPayloadJson').value = settingsModel.UdfPayloadJson;
+                    }
                     break;
                 default:
                     break;
@@ -173,7 +144,7 @@ function configureUiForAction(actionId) {
     if (actionId === ACTION_IDS.CONSUMPTION) {
         resourceLabel.innerText = 'Fabric Consumption Name';
         resourceInput.placeholder = 'Fabric Consumption Name';
-        workspaceSection.style.display = 'block';
+        workspaceSection.style.display = '';
         deploymentSection.style.display = 'none';
         if (udfSection) udfSection.style.display = 'none';
     } else if (actionId === ACTION_IDS.DEPLOY) {
@@ -183,15 +154,15 @@ function configureUiForAction(actionId) {
         deploymentSection.style.display = 'block';
         if (udfSection) udfSection.style.display = 'none';
     } else if (actionId === ACTION_IDS.UDF) {
-        resourceLabel.innerText = 'User Data Function Id';
-        resourceInput.placeholder = 'User Data Function Id';
-        workspaceSection.style.display = 'block';
+        resourceLabel.innerText = 'Function Public URL';
+        resourceInput.placeholder = 'Paste the function public URL from Fabric portal';
+        workspaceSection.style.display = 'none';
         deploymentSection.style.display = 'none';
         if (udfSection) udfSection.style.display = 'block';
     } else {
         resourceLabel.innerText = 'Fabric Resource Id';
         resourceInput.placeholder = 'Fabric Resource Id.';
-        workspaceSection.style.display = 'block';
+        workspaceSection.style.display = '';
         deploymentSection.style.display = 'none';
         if (udfSection) udfSection.style.display = 'none';
     }
