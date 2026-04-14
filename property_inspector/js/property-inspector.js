@@ -50,12 +50,6 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             settingsModel.UdfParam3Name = actionInfo.payload.settings.settingsModel.UdfParam3Name || '';
             settingsModel.UdfParam3Type = actionInfo.payload.settings.settingsModel.UdfParam3Type || 0;
             settingsModel.UdfParam3Value = actionInfo.payload.settings.settingsModel.UdfParam3Value || '';
-            settingsModel.UdfParam4Name = actionInfo.payload.settings.settingsModel.UdfParam4Name || '';
-            settingsModel.UdfParam4Type = actionInfo.payload.settings.settingsModel.UdfParam4Type || 0;
-            settingsModel.UdfParam4Value = actionInfo.payload.settings.settingsModel.UdfParam4Value || '';
-            settingsModel.UdfParam5Name = actionInfo.payload.settings.settingsModel.UdfParam5Name || '';
-            settingsModel.UdfParam5Type = actionInfo.payload.settings.settingsModel.UdfParam5Type || 0;
-            settingsModel.UdfParam5Value = actionInfo.payload.settings.settingsModel.UdfParam5Value || '';
         } else {
             settingsModel.WorkspaceId = "";
             settingsModel.ResourceId = "";
@@ -69,8 +63,6 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             settingsModel.UdfParam1Name = ""; settingsModel.UdfParam1Type = 0; settingsModel.UdfParam1Value = "";
             settingsModel.UdfParam2Name = ""; settingsModel.UdfParam2Type = 0; settingsModel.UdfParam2Value = "";
             settingsModel.UdfParam3Name = ""; settingsModel.UdfParam3Type = 0; settingsModel.UdfParam3Value = "";
-            settingsModel.UdfParam4Name = ""; settingsModel.UdfParam4Type = 0; settingsModel.UdfParam4Value = "";
-            settingsModel.UdfParam5Name = ""; settingsModel.UdfParam5Type = 0; settingsModel.UdfParam5Value = "";
         }
 
         document.getElementById('txtWorkspaceId').value = settingsModel.WorkspaceId;
@@ -89,12 +81,6 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
         document.getElementById('txtUdfParam3Name').value = settingsModel.UdfParam3Name;
         document.getElementById('selUdfParam3Type').value = settingsModel.UdfParam3Type;
         document.getElementById('txtUdfParam3Value').value = settingsModel.UdfParam3Value;
-        document.getElementById('txtUdfParam4Name').value = settingsModel.UdfParam4Name;
-        document.getElementById('selUdfParam4Type').value = settingsModel.UdfParam4Type;
-        document.getElementById('txtUdfParam4Value').value = settingsModel.UdfParam4Value;
-        document.getElementById('txtUdfParam5Name').value = settingsModel.UdfParam5Name;
-        document.getElementById('selUdfParam5Type').value = settingsModel.UdfParam5Type;
-        document.getElementById('txtUdfParam5Value').value = settingsModel.UdfParam5Value;
         document.getElementById('update_status_every_second').value = settingsModel.UpdateStatusEverySecond;
         document.getElementById('loginmethod').value = settingsModel.LoginMethod;
         document.getElementById('error_message').innerHTML = settingsModel.ErrorMessage;
@@ -147,7 +133,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         settingsModel.TargetStageId = normalizeStageValue(jsonObj.payload.settings.settingsModel.TargetStageId);
                         document.getElementById('txtTargetStageId').value = settingsModel.TargetStageId;
                     }
-                    ['1','2','3','4','5'].forEach(n => {
+                    ['1','2','3'].forEach(n => {
                         const sm = jsonObj.payload.settings.settingsModel;
                         if (sm['UdfParam' + n + 'Name'] !== undefined) {
                             settingsModel['UdfParam' + n + 'Name'] = sm['UdfParam' + n + 'Name'];

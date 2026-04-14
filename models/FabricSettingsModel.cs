@@ -33,7 +33,7 @@ namespace StreamDeckMicrosoftFabric.Models
         public string UdfParam1Name { get; set; } = "";
 
         /// <summary>
-        /// User Data Function parameter 1 type: 0 = string, 1 = integer
+        /// User Data Function parameter 1 type: 0 = string, 1 = integer, 2 = boolean
         /// </summary>
         public int UdfParam1Type { get; set; } = 0;
 
@@ -48,7 +48,7 @@ namespace StreamDeckMicrosoftFabric.Models
         public string UdfParam2Name { get; set; } = "";
 
         /// <summary>
-        /// User Data Function parameter 2 type: 0 = string, 1 = integer
+        /// User Data Function parameter 2 type: 0 = string, 1 = integer, 2 = boolean
         /// </summary>
         public int UdfParam2Type { get; set; } = 0;
 
@@ -63,7 +63,7 @@ namespace StreamDeckMicrosoftFabric.Models
         public string UdfParam3Name { get; set; } = "";
 
         /// <summary>
-        /// User Data Function parameter 3 type: 0 = string, 1 = integer
+        /// User Data Function parameter 3 type: 0 = string, 1 = integer, 2 = boolean
         /// </summary>
         public int UdfParam3Type { get; set; } = 0;
 
@@ -71,36 +71,6 @@ namespace StreamDeckMicrosoftFabric.Models
         /// User Data Function parameter 3 value
         /// </summary>
         public string UdfParam3Value { get; set; } = "";
-
-        /// <summary>
-        /// User Data Function parameter 4 name
-        /// </summary>
-        public string UdfParam4Name { get; set; } = "";
-
-        /// <summary>
-        /// User Data Function parameter 4 type: 0 = string, 1 = integer
-        /// </summary>
-        public int UdfParam4Type { get; set; } = 0;
-
-        /// <summary>
-        /// User Data Function parameter 4 value
-        /// </summary>
-        public string UdfParam4Value { get; set; } = "";
-
-        /// <summary>
-        /// User Data Function parameter 5 name
-        /// </summary>
-        public string UdfParam5Name { get; set; } = "";
-
-        /// <summary>
-        /// User Data Function parameter 5 type: 0 = string, 1 = integer
-        /// </summary>
-        public int UdfParam5Type { get; set; } = 0;
-
-        /// <summary>
-        /// User Data Function parameter 5 value
-        /// </summary>
-        public string UdfParam5Value { get; set; } = "";
 
         /// <summary>
         /// Client id from app registration that has access to Fabric.

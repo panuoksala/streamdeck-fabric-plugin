@@ -256,8 +256,6 @@ namespace StreamDeckMicrosoftFabric.Services
             AddUdfParameter(result, _settings.UdfParam1Name, _settings.UdfParam1Type, _settings.UdfParam1Value);
             AddUdfParameter(result, _settings.UdfParam2Name, _settings.UdfParam2Type, _settings.UdfParam2Value);
             AddUdfParameter(result, _settings.UdfParam3Name, _settings.UdfParam3Type, _settings.UdfParam3Value);
-            AddUdfParameter(result, _settings.UdfParam4Name, _settings.UdfParam4Type, _settings.UdfParam4Value);
-            AddUdfParameter(result, _settings.UdfParam5Name, _settings.UdfParam5Type, _settings.UdfParam5Value);
 
             return result;
         }
@@ -272,6 +270,10 @@ namespace StreamDeckMicrosoftFabric.Services
             if (type == 1 && int.TryParse(value, out var intValue))
             {
                 dict[name] = intValue;
+            }
+            else if (type == 2)
+            {
+                dict[name] = value.Equals("true", StringComparison.OrdinalIgnoreCase);
             }
             else
             {
