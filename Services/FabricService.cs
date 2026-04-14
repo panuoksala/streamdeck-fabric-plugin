@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using StreamDeckMicrosoftFabric.Models;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Net.Http;
 using System.Text;
@@ -45,6 +46,11 @@ namespace StreamDeckMicrosoftFabric.Services
             if (actionType == SupportedActions.Deploy)
             {
                 return await RunDeploymentAsync(jobId);
+            }
+
+            if (actionType == SupportedActions.RunUserDataFunction)
+            {
+                return await RunUserDataFunctionAsync(jobId);
             }
 
             _logger.LogInformation($"Running job {jobId}.");
@@ -202,6 +208,72 @@ namespace StreamDeckMicrosoftFabric.Services
 
             _logger.LogWarning("Capacity with name '{CapacityName}' not found in usage list.", capacityName);
             return null;
+        }
+
+        private async Task<bool> RunUserDataFunctionAsync(string functionUrl)
+        {
+            if (string.IsNullOrWhiteSpace(functionUrl))
+            {
+                _settings.ErrorMessage = "User Data Function URL is required.";
+                _logger.LogWarning("Missing User Data Function URL.");
+                return false;
+            }
+
+            var client = _clientFactory.CreateClient();
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_login.AccessToken}");
+
+            if (!TryBuildUdfParametersJson(out var json))
+            {
+                return false;
+            }
+
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync(functionUrl, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _lastJobLocation = null;
+                LastJobItemStatus = JobRunStatus.Success;
+                _logger.LogInformation("User Data Function invoked successfully. URL: {Url}", functionUrl);
+                return true;
+            }
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _settings.ErrorMessage = responseContent;
+            _logger.LogError("Failed to invoke User Data Function. URL: {Url}. Error: {Error}", functionUrl, responseContent);
+            return false;
+        }
+
+        private bool TryBuildUdfParametersJson(out string json)
+        {
+            if (!string.IsNullOrWhiteSpace(_settings.UdfPayloadJson))
+            {
+                try
+                {
+                    var payload = JsonNode.Parse(_settings.UdfPayloadJson);
+                    if (payload is not JsonObject jsonObject)
+                    {
+                        _settings.ErrorMessage = "UDF payload must be a JSON object.";
+                        _logger.LogWarning("Invalid UDF payload. Root element must be a JSON object.");
+                        json = string.Empty;
+                        return false;
+                    }
+
+                    json = jsonObject.ToJsonString();
+                    return true;
+                }
+                catch (JsonException ex)
+                {
+                    _settings.ErrorMessage = $"Invalid UDF payload JSON: {ex.Message}";
+                    _logger.LogWarning(ex, "Invalid UDF payload JSON.");
+                    json = string.Empty;
+                    return false;
+                }
+            }
+
+            json = "{}";
+            return true;
         }
 
         private async Task<bool> RunDeploymentAsync(string deploymentPipelineId)

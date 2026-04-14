@@ -113,6 +113,8 @@ namespace StreamDeckMicrosoftFabric
                     Guid.TryParse(SettingsModel.SourceStageId, out _) &&
                     Guid.TryParse(SettingsModel.TargetStageId, out _) &&
                     !string.IsNullOrWhiteSpace(SettingsModel.TenantId),
+                SupportedActions.RunUserDataFunction =>
+                    !string.IsNullOrWhiteSpace(SettingsModel.ResourceId),
                 _ => SettingsModel.IsValid(),
             };
         }

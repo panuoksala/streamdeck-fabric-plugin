@@ -16,7 +16,8 @@ const normalizeStageValue = (value) => {
 
 const ACTION_IDS = {
     CONSUMPTION: 'net.fabricdeck.microsoftfabric.consumptionrunner',
-    DEPLOY: 'net.fabricdeck.microsoftfabric.deployrunner'
+    DEPLOY: 'net.fabricdeck.microsoftfabric.deployrunner',
+    UDF: 'net.fabricdeck.microsoftfabric.userdatafunctionrunner'
 };
 
 function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
@@ -40,6 +41,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             settingsModel.LoginMethod = actionInfo.payload.settings.settingsModel.LoginMethod;
             settingsModel.SourceStageId = normalizeStageValue(actionInfo.payload.settings.settingsModel.SourceStageId);
             settingsModel.TargetStageId = normalizeStageValue(actionInfo.payload.settings.settingsModel.TargetStageId);
+            settingsModel.UdfPayloadJson = actionInfo.payload.settings.settingsModel.UdfPayloadJson || '';
         } else {
             settingsModel.WorkspaceId = "";
             settingsModel.ResourceId = "";
@@ -50,6 +52,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             settingsModel.Secret = "";
             settingsModel.SourceStageId = "";
             settingsModel.TargetStageId = "";
+            settingsModel.UdfPayloadJson = "";
         }
 
         document.getElementById('txtWorkspaceId').value = settingsModel.WorkspaceId;
@@ -59,6 +62,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
         document.getElementById('txtTenantId').value = settingsModel.TenantId;
         document.getElementById('txtSourceStageId').value = settingsModel.SourceStageId;
         document.getElementById('txtTargetStageId').value = settingsModel.TargetStageId;
+        document.getElementById('txtUdfPayloadJson').value = settingsModel.UdfPayloadJson;
         document.getElementById('update_status_every_second').value = settingsModel.UpdateStatusEverySecond;
         document.getElementById('loginmethod').value = settingsModel.LoginMethod;
         document.getElementById('error_message').innerHTML = settingsModel.ErrorMessage;
@@ -111,6 +115,10 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         settingsModel.TargetStageId = normalizeStageValue(jsonObj.payload.settings.settingsModel.TargetStageId);
                         document.getElementById('txtTargetStageId').value = settingsModel.TargetStageId;
                     }
+                    if (jsonObj.payload.settings.settingsModel.UdfPayloadJson !== undefined) {
+                        settingsModel.UdfPayloadJson = jsonObj.payload.settings.settingsModel.UdfPayloadJson;
+                        document.getElementById('txtUdfPayloadJson').value = settingsModel.UdfPayloadJson;
+                    }
                     break;
                 default:
                     break;
@@ -125,8 +133,9 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 function configureUiForAction(actionId) {
     const resourceLabel = document.getElementById('resource_id_label');
     const resourceInput = document.getElementById('txtResourceId');
-    const workspaceSection = document.getElementById('workspace_settings');
+    const workspaceSection = document.getElementById('workspace_id');
     const deploymentSection = document.getElementById('deployment_settings');
+    const udfSection = document.getElementById('udf_settings');
 
     if (!resourceLabel || !resourceInput || !workspaceSection || !deploymentSection) {
         return;
@@ -135,18 +144,27 @@ function configureUiForAction(actionId) {
     if (actionId === ACTION_IDS.CONSUMPTION) {
         resourceLabel.innerText = 'Fabric Consumption Name';
         resourceInput.placeholder = 'Fabric Consumption Name';
-        workspaceSection.style.display = 'block';
+        workspaceSection.style.display = '';
         deploymentSection.style.display = 'none';
+        if (udfSection) udfSection.style.display = 'none';
     } else if (actionId === ACTION_IDS.DEPLOY) {
         resourceLabel.innerText = 'Deployment Pipeline Id';
         resourceInput.placeholder = 'Deployment Pipeline Id';
         workspaceSection.style.display = 'none';
         deploymentSection.style.display = 'block';
+        if (udfSection) udfSection.style.display = 'none';
+    } else if (actionId === ACTION_IDS.UDF) {
+        resourceLabel.innerText = 'Function Public URL';
+        resourceInput.placeholder = 'Paste the function public URL from Fabric portal';
+        workspaceSection.style.display = 'none';
+        deploymentSection.style.display = 'none';
+        if (udfSection) udfSection.style.display = 'block';
     } else {
         resourceLabel.innerText = 'Fabric Resource Id';
         resourceInput.placeholder = 'Fabric Resource Id.';
-        workspaceSection.style.display = 'block';
+        workspaceSection.style.display = '';
         deploymentSection.style.display = 'none';
+        if (udfSection) udfSection.style.display = 'none';
     }
 }
 

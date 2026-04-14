@@ -28,6 +28,11 @@ namespace StreamDeckMicrosoftFabric.Models
         public string TargetStageId { get; set; } = string.Empty;
 
         /// <summary>
+        /// User Data Function JSON payload
+        /// </summary>
+        public string UdfPayloadJson { get; set; } = "";
+
+        /// <summary>
         /// Client id from app registration that has access to Fabric.
         /// Plugin currently uses interactive authentication as Fabric does not support anything else at the moment.
         /// So no need to provide client secret.

@@ -55,6 +55,20 @@
       "SupportedInMultiActions": false,
       "Tooltip": "Deploy all content between Fabric deployment pipeline stages. Note: this action will deploy all resources!",
       "UUID": "net.fabricdeck.microsoftfabric.deployrunner"
+    },
+    {
+      "Icon": "images/Fabric_notebook",
+      "Name": "Run User Data Function",
+      "States": [
+        {
+          "Image": "images/Fabric72",
+          "TitleAlignment": "middle",
+          "FontSize": 10
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "Tooltip": "Run a Microsoft Fabric User Data Function directly from your Stream Deck.",
+      "UUID": "net.fabricdeck.microsoftfabric.userdatafunctionrunner"
     }
   ],
   "Category": "Fabric Deck",

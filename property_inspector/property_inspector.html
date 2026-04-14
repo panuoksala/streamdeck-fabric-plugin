@@ -12,11 +12,9 @@
             <div class="sdpi-item-label">Tenant Id</div>
             <input id="txtTenantId" class="sdpi-item-value" type="text" placeholder="Tenant Id." onKeyUp="setSettings(event.target.value, 'TenantId')" required />
         </div>
-        <div id="workspace_settings" style="display: block;">
-            <div class="sdpi-item" id="workspace_id" type="field">
-                <div class="sdpi-item-label">Workspace Id</div>
-                <input id="txtWorkspaceId" class="sdpi-item-value" type="text" placeholder="Workspace Id. Use Me for own workspace." onKeyUp="setSettings(event.target.value, 'WorkspaceId')" required />
-            </div>
+        <div class="sdpi-item" id="workspace_id" type="field">
+            <div class="sdpi-item-label">Workspace Id</div>
+            <input id="txtWorkspaceId" class="sdpi-item-value" type="text" placeholder="Workspace Id." onKeyUp="setSettings(event.target.value, 'WorkspaceId')" required />
         </div>
         <div class="sdpi-item" id="resource_id" type="field">
             <div class="sdpi-item-label" id="resource_id_label">Fabric Resource Id</div>
@@ -30,6 +28,12 @@
             <div class="sdpi-item" id="target_stage" type="field">
                 <div class="sdpi-item-label">Target Stage Id</div>
                 <input id="txtTargetStageId" class="sdpi-item-value" type="text" placeholder="Target Stage Id (GUID)" spellcheck="false" oninput="setSettings(event.target.value, 'TargetStageId')" />
+            </div>
+        </div>
+        <div id="udf_settings" style="display: none;">
+            <div class="sdpi-item" type="field">
+                <div class="sdpi-item-label">JSON Payload</div>
+                <textarea id="txtUdfPayloadJson" class="sdpi-item-value" style="min-height: 120px; resize: vertical;" placeholder='{"name":"value"}' spellcheck="false" oninput="setSettings(event.target.value, 'UdfPayloadJson')"></textarea>
             </div>
         </div>
         <div class="sdpi-item" id="select_loginmethod">
