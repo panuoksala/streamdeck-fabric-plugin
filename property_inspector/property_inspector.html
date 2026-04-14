@@ -32,6 +32,53 @@
                 <input id="txtTargetStageId" class="sdpi-item-value" type="text" placeholder="Target Stage Id (GUID)" spellcheck="false" oninput="setSettings(event.target.value, 'TargetStageId')" />
             </div>
         </div>
+        <div id="udf_settings" style="display: none;">
+            <div class="sdpi-item" type="field">
+                <div class="sdpi-item-label">Parameter 1</div>
+                <input id="txtUdfParam1Name" class="sdpi-item-value" style="width:38%" type="text" placeholder="Name" oninput="setSettings(event.target.value, 'UdfParam1Name')" />
+                <select id="selUdfParam1Type" style="width:20%" onchange="setSettings(parseInt(event.target.value), 'UdfParam1Type')">
+                    <option value="0">String</option>
+                    <option value="1">Integer</option>
+                </select>
+                <input id="txtUdfParam1Value" class="sdpi-item-value" style="width:38%" type="text" placeholder="Value" oninput="setSettings(event.target.value, 'UdfParam1Value')" />
+            </div>
+            <div class="sdpi-item" type="field">
+                <div class="sdpi-item-label">Parameter 2</div>
+                <input id="txtUdfParam2Name" class="sdpi-item-value" style="width:38%" type="text" placeholder="Name" oninput="setSettings(event.target.value, 'UdfParam2Name')" />
+                <select id="selUdfParam2Type" style="width:20%" onchange="setSettings(parseInt(event.target.value), 'UdfParam2Type')">
+                    <option value="0">String</option>
+                    <option value="1">Integer</option>
+                </select>
+                <input id="txtUdfParam2Value" class="sdpi-item-value" style="width:38%" type="text" placeholder="Value" oninput="setSettings(event.target.value, 'UdfParam2Value')" />
+            </div>
+            <div class="sdpi-item" type="field">
+                <div class="sdpi-item-label">Parameter 3</div>
+                <input id="txtUdfParam3Name" class="sdpi-item-value" style="width:38%" type="text" placeholder="Name" oninput="setSettings(event.target.value, 'UdfParam3Name')" />
+                <select id="selUdfParam3Type" style="width:20%" onchange="setSettings(parseInt(event.target.value), 'UdfParam3Type')">
+                    <option value="0">String</option>
+                    <option value="1">Integer</option>
+                </select>
+                <input id="txtUdfParam3Value" class="sdpi-item-value" style="width:38%" type="text" placeholder="Value" oninput="setSettings(event.target.value, 'UdfParam3Value')" />
+            </div>
+            <div class="sdpi-item" type="field">
+                <div class="sdpi-item-label">Parameter 4</div>
+                <input id="txtUdfParam4Name" class="sdpi-item-value" style="width:38%" type="text" placeholder="Name" oninput="setSettings(event.target.value, 'UdfParam4Name')" />
+                <select id="selUdfParam4Type" style="width:20%" onchange="setSettings(parseInt(event.target.value), 'UdfParam4Type')">
+                    <option value="0">String</option>
+                    <option value="1">Integer</option>
+                </select>
+                <input id="txtUdfParam4Value" class="sdpi-item-value" style="width:38%" type="text" placeholder="Value" oninput="setSettings(event.target.value, 'UdfParam4Value')" />
+            </div>
+            <div class="sdpi-item" type="field">
+                <div class="sdpi-item-label">Parameter 5</div>
+                <input id="txtUdfParam5Name" class="sdpi-item-value" style="width:38%" type="text" placeholder="Name" oninput="setSettings(event.target.value, 'UdfParam5Name')" />
+                <select id="selUdfParam5Type" style="width:20%" onchange="setSettings(parseInt(event.target.value), 'UdfParam5Type')">
+                    <option value="0">String</option>
+                    <option value="1">Integer</option>
+                </select>
+                <input id="txtUdfParam5Value" class="sdpi-item-value" style="width:38%" type="text" placeholder="Value" oninput="setSettings(event.target.value, 'UdfParam5Value')" />
+            </div>
+        </div>
         <div class="sdpi-item" id="select_loginmethod">
             <div class="sdpi-item-label">Login Method</div>
             <select class="sdpi-item-value select" id="loginmethod" onchange="setSettings(event.target.value, 'LoginMethod')">

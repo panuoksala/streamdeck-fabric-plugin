@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using StreamDeckMicrosoftFabric.Models;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Net.Http;
 using System.Text;
@@ -45,6 +46,11 @@ namespace StreamDeckMicrosoftFabric.Services
             if (actionType == SupportedActions.Deploy)
             {
                 return await RunDeploymentAsync(jobId);
+            }
+
+            if (actionType == SupportedActions.RunUserDataFunction)
+            {
+                return await RunUserDataFunctionAsync(workspaceId, jobId);
             }
 
             _logger.LogInformation($"Running job {jobId}.");
@@ -202,6 +208,75 @@ namespace StreamDeckMicrosoftFabric.Services
 
             _logger.LogWarning("Capacity with name '{CapacityName}' not found in usage list.", capacityName);
             return null;
+        }
+
+        private async Task<bool> RunUserDataFunctionAsync(string workspaceId, string functionId)
+        {
+            if (string.IsNullOrWhiteSpace(workspaceId) || string.IsNullOrWhiteSpace(functionId))
+            {
+                _settings.ErrorMessage = "Workspace id and User Data Function id are required.";
+                _logger.LogWarning("Missing UDF configuration. WorkspaceId: {WorkspaceId}, FunctionId: {FunctionId}", workspaceId, functionId);
+                return false;
+            }
+
+            var client = _clientFactory.CreateClient();
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_login.AccessToken}");
+
+            var parameters = BuildUdfParameters();
+            var url = $"https://api.fabric.microsoft.com/v1/workspaces/{workspaceId}/userDataFunctions/{functionId}/jobs/instances?jobType=UserDataFunctionsRun";
+
+            System.Net.Http.HttpContent content = null;
+            if (parameters.Count > 0)
+            {
+                var body = new { executionData = new { parameters } };
+                var json = JsonSerializer.Serialize(body);
+                content = new StringContent(json, Encoding.UTF8, "application/json");
+            }
+
+            var response = await client.PostAsync(url, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _lastJobLocation = response.Headers.Location;
+                LastJobItemStatus = _lastJobLocation is null ? JobRunStatus.Success : JobRunStatus.Running;
+                _logger.LogInformation("User Data Function triggered for function {FunctionId}. Operation location: {Location}", functionId, _lastJobLocation);
+                return true;
+            }
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            _settings.ErrorMessage = responseContent;
+            _logger.LogError("Failed to run User Data Function {FunctionId}. Error {Error}", functionId, responseContent);
+            return false;
+        }
+
+        private Dictionary<string, object> BuildUdfParameters()
+        {
+            var result = new Dictionary<string, object>();
+
+            AddUdfParameter(result, _settings.UdfParam1Name, _settings.UdfParam1Type, _settings.UdfParam1Value);
+            AddUdfParameter(result, _settings.UdfParam2Name, _settings.UdfParam2Type, _settings.UdfParam2Value);
+            AddUdfParameter(result, _settings.UdfParam3Name, _settings.UdfParam3Type, _settings.UdfParam3Value);
+            AddUdfParameter(result, _settings.UdfParam4Name, _settings.UdfParam4Type, _settings.UdfParam4Value);
+            AddUdfParameter(result, _settings.UdfParam5Name, _settings.UdfParam5Type, _settings.UdfParam5Value);
+
+            return result;
+        }
+
+        private static void AddUdfParameter(Dictionary<string, object> dict, string name, int type, string value)
+        {
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(value))
+            {
+                return;
+            }
+
+            if (type == 1 && int.TryParse(value, out var intValue))
+            {
+                dict[name] = intValue;
+            }
+            else
+            {
+                dict[name] = value;
+            }
         }
 
         private async Task<bool> RunDeploymentAsync(string deploymentPipelineId)
