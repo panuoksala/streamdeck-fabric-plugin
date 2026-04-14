@@ -272,40 +272,8 @@ namespace StreamDeckMicrosoftFabric.Services
                 }
             }
 
-            json = JsonSerializer.Serialize(BuildLegacyUdfParameters());
+            json = "{}";
             return true;
-        }
-
-        private Dictionary<string, object> BuildLegacyUdfParameters()
-        {
-            var result = new Dictionary<string, object>();
-
-            AddUdfParameter(result, _settings.UdfParam1Name, _settings.UdfParam1Type, _settings.UdfParam1Value);
-            AddUdfParameter(result, _settings.UdfParam2Name, _settings.UdfParam2Type, _settings.UdfParam2Value);
-            AddUdfParameter(result, _settings.UdfParam3Name, _settings.UdfParam3Type, _settings.UdfParam3Value);
-
-            return result;
-        }
-
-        private static void AddUdfParameter(Dictionary<string, object> dict, string name, int type, string value)
-        {
-            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(value))
-            {
-                return;
-            }
-
-            if (type == 1 && int.TryParse(value, out var intValue))
-            {
-                dict[name] = intValue;
-            }
-            else if (type == 2)
-            {
-                dict[name] = value.Equals("true", StringComparison.OrdinalIgnoreCase);
-            }
-            else
-            {
-                dict[name] = value;
-            }
         }
 
         private async Task<bool> RunDeploymentAsync(string deploymentPipelineId)

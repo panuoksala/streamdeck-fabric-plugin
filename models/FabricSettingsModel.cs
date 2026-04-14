@@ -33,51 +33,6 @@ namespace StreamDeckMicrosoftFabric.Models
         public string UdfPayloadJson { get; set; } = "";
 
         /// <summary>
-        /// User Data Function parameter 1 name
-        /// </summary>
-        public string UdfParam1Name { get; set; } = "";
-
-        /// <summary>
-        /// User Data Function parameter 1 type: 0 = string, 1 = integer, 2 = boolean
-        /// </summary>
-        public int UdfParam1Type { get; set; } = 0;
-
-        /// <summary>
-        /// User Data Function parameter 1 value
-        /// </summary>
-        public string UdfParam1Value { get; set; } = "";
-
-        /// <summary>
-        /// User Data Function parameter 2 name
-        /// </summary>
-        public string UdfParam2Name { get; set; } = "";
-
-        /// <summary>
-        /// User Data Function parameter 2 type: 0 = string, 1 = integer, 2 = boolean
-        /// </summary>
-        public int UdfParam2Type { get; set; } = 0;
-
-        /// <summary>
-        /// User Data Function parameter 2 value
-        /// </summary>
-        public string UdfParam2Value { get; set; } = "";
-
-        /// <summary>
-        /// User Data Function parameter 3 name
-        /// </summary>
-        public string UdfParam3Name { get; set; } = "";
-
-        /// <summary>
-        /// User Data Function parameter 3 type: 0 = string, 1 = integer, 2 = boolean
-        /// </summary>
-        public int UdfParam3Type { get; set; } = 0;
-
-        /// <summary>
-        /// User Data Function parameter 3 value
-        /// </summary>
-        public string UdfParam3Value { get; set; } = "";
-
-        /// <summary>
         /// Client id from app registration that has access to Fabric.
         /// Plugin currently uses interactive authentication as Fabric does not support anything else at the moment.
         /// So no need to provide client secret.
